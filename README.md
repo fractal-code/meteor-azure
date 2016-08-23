@@ -15,3 +15,20 @@ Git-based Meteor deployments on Azure App Service
 
 1. Copy the contents of the ```script``` directory into the root of your app
 2. Configure a deployment source in the Azure portal ([detailed instructions](https://azure.microsoft.com/en-us/documentation/articles/app-service-continuous-deployment)) 
+
+## Force HTTPS
+
+Meteor's core [force-ssl](https://atmospherejs.com/meteor/force-ssl) package is incompatible with IIS. You can achieve the same functionality with a rewrite rule in your web.config:
+
+```
+<!-- Force HTTPS -->
+<rule name="Redirect to HTTPS" stopProcessing="true">
+  <match url="(.*)" />
+  <conditions>
+    <add input="{HTTPS}" pattern="^OFF$" />
+  </conditions>
+   <action type="Redirect" url="https://{HTTP_HOST}/{R:1}" redirectType="Permanent" />
+</rule>
+```
+
+Note that with the approach above Meteor will not automatically set ROOT_URL to 'https' if specified incorrectly. 
