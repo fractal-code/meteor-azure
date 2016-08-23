@@ -10,6 +10,7 @@ Git-based Meteor deployments on Azure App Service
     * ROOT_URL - http://{sitename}.azurewebsites.net or your custom domain if you've set that up
     * WEBSITE_NODE_DEFAULT_VERSION - (Node version bundled with your current Meteor release)
     * METEOR_SETTINGS - (Optional: Meteor app setting content e.g from your settings.json) 
+    * SCM_COMMAND_IDLE_TIMEOUT - 900 or something else if you know what you're doing
 
 ### Setup instructions
 
