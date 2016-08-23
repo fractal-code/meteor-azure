@@ -2,7 +2,7 @@
 
 Git-based Meteor deployments on Azure App Service
 
-## Prerequisites
+### Prerequisites
 
 1. Meteor 1.4+
 2. App Service with following App Settings:
@@ -11,12 +11,12 @@ Git-based Meteor deployments on Azure App Service
     * WEBSITE_NODE_DEFAULT_VERSION - (Node version bundled with your current Meteor release)
     * METEOR_SETTINGS - (Optional: Meteor app setting content e.g from your settings.json) 
 
-## Setup instructions
+### Setup instructions
 
 1. Copy the contents of the ```script``` directory into the top-level of your repository
 2. Configure a deployment source in the Azure portal ([detailed instructions](https://azure.microsoft.com/en-us/documentation/articles/app-service-continuous-deployment)) 
 
-## Force HTTPS
+### Force HTTPS
 
 Meteor's core [force-ssl](https://atmospherejs.com/meteor/force-ssl) package is incompatible with IIS. You can achieve the same functionality with a rewrite rule in your web.config:
 
