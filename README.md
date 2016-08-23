@@ -20,7 +20,7 @@ Git-based Meteor deployments on Azure App Service
 
 Meteor's core [force-ssl](https://atmospherejs.com/meteor/force-ssl) package is incompatible with IIS. You can achieve the same functionality with a rewrite rule in your web.config:
 
-```
+```xml
 <!-- Force HTTPS -->
 <rule name="Redirect to HTTPS" stopProcessing="true">
   <match url="(.*)" />
