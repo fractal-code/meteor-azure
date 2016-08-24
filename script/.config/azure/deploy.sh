@@ -64,36 +64,6 @@ if [[ ! -n "$KUDU_SYNC_CMD" ]]; then
   fi
 fi
 
-# Node Helpers
-# ----------
-
-selectNodeVersion () {
-  if [[ -n "$KUDU_SELECT_NODE_VERSION_CMD" ]]; then
-    SELECT_NODE_VERSION="$KUDU_SELECT_NODE_VERSION_CMD \"$DEPLOYMENT_SOURCE\" \"$DEPLOYMENT_TARGET\" \"$DEPLOYMENT_TEMP\""
-    eval $SELECT_NODE_VERSION
-    exitWithMessageOnError "select node version failed"
-
-    if [[ -e "$DEPLOYMENT_TEMP/__nodeVersion.tmp" ]]; then
-      NODE_EXE=`cat "$DEPLOYMENT_TEMP/__nodeVersion.tmp"`
-      exitWithMessageOnError "getting node version failed"
-    fi
-
-    if [[ -e "$DEPLOYMENT_TEMP/__npmVersion.tmp" ]]; then
-      NPM_JS_PATH=`cat "$DEPLOYMENT_TEMP/__npmVersion.tmp"`
-      exitWithMessageOnError "getting npm version failed"
-    fi
-
-    if [[ ! -n "$NODE_EXE" ]]; then
-      NODE_EXE=node
-    fi
-
-    NPM_CMD="\"$NODE_EXE\" \"$NPM_JS_PATH\""
-  else
-    NPM_CMD=npm
-    NODE_EXE=node
-  fi
-}
-
 ##################################################################################################################################
 
 # Compilation
@@ -106,12 +76,23 @@ if [ ! -d "$LOCALAPPDATA/.meteor" ]; then
   rm meteor.tar.gz
 fi
 
+# Install Underscore CLI
+if ! hash underscore 2>/dev/null; then
+  cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" npm install -g underscore-cli
+fi
+
 # Generate Meteor build
 cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" npm install --production
 cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" build "$DEPLOYMENT_TEMP" --directory
 
-# Add project config
+# Add IIS config
 cp .config/azure/web.config "$DEPLOYMENT_TEMP\bundle"
+
+# Add entry-point
+cd "$DEPLOYMENT_TEMP\bundle\programs\server"
+underscore -i package.json extend "{ main: '../../main.js', scripts: { start: 'node ../../main' } }" -o temp-package.json
+rm package.json
+cmd //c rename temp-package.json package.json
 
 # Deployment
 # ----------
@@ -124,13 +105,10 @@ if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
   exitWithMessageOnError "Kudu Sync failed"
 fi
 
-# 2. Select node version
-selectNodeVersion
-
-# 3. Install npm packages
+# 2. Install npm packages
 if [ -e "$DEPLOYMENT_TARGET/programs/server/package.json" ]; then
   cd "$DEPLOYMENT_TARGET/programs/server"
-  eval $NPM_CMD install --production
+  cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" npm install --production
   exitWithMessageOnError "npm failed"
   cd - > /dev/null
 fi
