@@ -5,7 +5,8 @@ Git-based Meteor deployments on Azure App Service
 ### Prerequisites
 
 1. Meteor 1.4+
-2. App Service with following App Settings:
+2. App Service on Basic plan or higher
+3. Following App Settings:
     * MONGO_URL - (MongoDB connection string)
     * MONGO_OPLOG_URL (Optional: Recommended with multiple instances) 
     * ROOT_URL - http://{sitename}.azurewebsites.net or your custom domain if you've set that up
