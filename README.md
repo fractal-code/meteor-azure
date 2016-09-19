@@ -6,13 +6,16 @@ Git-based Meteor deployments on Azure App Service
 
 1. Meteor 1.4+
 2. App Service on Basic plan or higher
-3. Following App Settings:
+3. Following General Settings:
+    * Web sockets - On
+    * ARR Affinity - On
+4. Following App Settings:
+    * SCM_COMMAND_IDLE_TIMEOUT - 900
     * MONGO_URL - (MongoDB connection string)
-    * MONGO_OPLOG_URL (Optional: Recommended with multiple instances) 
+    * MONGO_OPLOG_URL - (Optional: Recommended with multiple instances) 
     * ROOT_URL - http://{sitename}.azurewebsites.net or your custom domain if you've set that up
+    * METEOR_SETTINGS - (Optional: e.g from your settings.json)
     * WEBSITE_NODE_DEFAULT_VERSION - (Node version bundled with your current Meteor release)
-    * METEOR_SETTINGS - (Optional: Meteor app setting content e.g from your settings.json) 
-    * SCM_COMMAND_IDLE_TIMEOUT - 900 or something else if you know what you're doing
 
 ### Setup instructions
 
