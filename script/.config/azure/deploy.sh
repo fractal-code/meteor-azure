@@ -97,6 +97,11 @@ selectNodeVersion () {
 # Compilation
 # ------------
 
+# Ensure working directory is clean
+if [ -d "$DEPLOYMENT_TEMP\output" ]; then
+  rm -rf "$DEPLOYMENT_TEMP\output"
+fi
+
 # Install Meteor
 if [ ! -d "$LOCALAPPDATA/.meteor" ]; then
   curl -L -o meteor.tar.gz "https://packages.meteor.com/bootstrap-link?arch=os.windows.x86_32"
@@ -111,13 +116,13 @@ fi
 
 # Generate Meteor build
 cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" npm install --production
-cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" build "$DEPLOYMENT_TEMP" --directory
+cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" build "$DEPLOYMENT_TEMP\output" --directory
 
 # Add IIS config
-cp .config/azure/web.config "$DEPLOYMENT_TEMP\bundle"
+cp .config/azure/web.config "$DEPLOYMENT_TEMP\output\bundle"
 
 # Add entry-point
-cd "$DEPLOYMENT_TEMP\bundle\programs\server"
+cd "$DEPLOYMENT_TEMP\output\bundle\programs\server"
 underscore -i package.json extend "{ main: '../../main.js', scripts: { start: 'node ../../main' } }" -o temp-package.json
 rm package.json
 cmd //c rename temp-package.json package.json
@@ -130,7 +135,7 @@ echo Handling node.js deployment.
 
 # 1. KuduSync
 if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
-  "$KUDU_SYNC_CMD" -v 50 -f "$DEPLOYMENT_TEMP\bundle" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;.config"
+  "$KUDU_SYNC_CMD" -v 50 -f "$DEPLOYMENT_TEMP\output\bundle" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;.config"
   exitWithMessageOnError "Kudu Sync failed"
 fi
 
