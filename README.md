@@ -38,3 +38,7 @@ Meteor's core [force-ssl](https://atmospherejs.com/meteor/force-ssl) package is 
 ```
 
 Note that with this approach Meteor will not automatically set ROOT_URL to 'https' if specified falsely.
+
+### Example
+
+See the [meteor-azure-example](https://github.com/talos-code/meteor-azure-example) repo
