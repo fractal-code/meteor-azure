@@ -103,7 +103,7 @@ if [ -d "$DEPLOYMENT_TEMP\output" ]; then
 fi
 
 # Install Meteor
-if [ ! -d "$LOCALAPPDATA/.meteor" ]; then
+if [ ! -e "$LOCALAPPDATA\.meteor\meteor.bat" ]; then
   curl -L -o meteor.tar.gz "https://packages.meteor.com/bootstrap-link?arch=os.windows.x86_32"
   tar -zxf meteor.tar.gz -C "$LOCALAPPDATA"
   rm meteor.tar.gz
