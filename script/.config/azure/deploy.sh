@@ -104,6 +104,7 @@ fi
 
 # Install Meteor
 if [ ! -e "$LOCALAPPDATA\.meteor\meteor.bat" ]; then
+  echo meteor-azure: Installing Meteor
   curl -L -o meteor.tar.gz "https://packages.meteor.com/bootstrap-link?arch=os.windows.x86_32"
   tar -zxf meteor.tar.gz -C "$LOCALAPPDATA"
   rm meteor.tar.gz
@@ -111,17 +112,18 @@ fi
 
 # Install Underscore CLI
 if ! hash underscore 2>/dev/null; then
+  echo meteor-azure: Installing Underscore CLI
   cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" npm install -g underscore-cli
 fi
 
 # Generate Meteor build
+echo meteor-azure: Building app
 cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" npm install --production
 cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" build "$DEPLOYMENT_TEMP\output" --directory
-
-# Add IIS config
 cp .config/azure/web.config "$DEPLOYMENT_TEMP\output\bundle"
 
 # Add entry-point
+echo meteor-azure: Preparing package.json
 cd "$DEPLOYMENT_TEMP\output\bundle\programs\server"
 underscore -i package.json extend "{ main: '../../main.js', scripts: { start: 'node ../../main' } }" -o temp-package.json
 rm package.json
@@ -151,4 +153,4 @@ if [ -e "$DEPLOYMENT_TARGET/programs/server/package.json" ]; then
 fi
 
 ##################################################################################################################################
-echo "Finished successfully."
+echo "meteor-azure: Finished successfully."
