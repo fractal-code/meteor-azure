@@ -2,11 +2,11 @@
 
 # ----------------------
 # KUDU Deployment Script
-# Version: 1.0.6
+# Version: 1.0.8
 # ----------------------
 
 # Helpers
-# ----------
+# -------
 
 exitWithMessageOnError () {
   if [ ! $? -eq 0 ]; then
@@ -17,14 +17,14 @@ exitWithMessageOnError () {
 }
 
 # Prerequisites
-# ----------
+# -------------
 
 # Verify node.js installed
 hash node 2>/dev/null
 exitWithMessageOnError "Missing node.js executable, please install node.js, if already installed make sure it can be reached from current environment."
 
 # Setup
-# ----------
+# -----
 
 SCRIPT_DIR="${BASH_SOURCE[0]%\\*}"
 SCRIPT_DIR="${SCRIPT_DIR%/*}"
@@ -64,10 +64,38 @@ if [[ ! -n "$KUDU_SYNC_CMD" ]]; then
   fi
 fi
 
-##################################################################################################################################
+# Node Helpers
+# ------------
+
+selectNodeVersion () {
+  if [[ -n "$KUDU_SELECT_NODE_VERSION_CMD" ]]; then
+    SELECT_NODE_VERSION="$KUDU_SELECT_NODE_VERSION_CMD \"$DEPLOYMENT_SOURCE\" \"$DEPLOYMENT_TARGET\" \"$DEPLOYMENT_TEMP\""
+    eval $SELECT_NODE_VERSION
+    exitWithMessageOnError "select node version failed"
+
+    if [[ -e "$DEPLOYMENT_TEMP/__nodeVersion.tmp" ]]; then
+      NODE_EXE=`cat "$DEPLOYMENT_TEMP/__nodeVersion.tmp"`
+      exitWithMessageOnError "getting node version failed"
+    fi
+
+    if [[ -e "$DEPLOYMENT_TEMP/__npmVersion.tmp" ]]; then
+      NPM_JS_PATH=`cat "$DEPLOYMENT_TEMP/__npmVersion.tmp"`
+      exitWithMessageOnError "getting npm version failed"
+    fi
+
+    if [[ ! -n "$NODE_EXE" ]]; then
+      NODE_EXE=node
+    fi
+
+    NPM_CMD="\"$NODE_EXE\" \"$NPM_JS_PATH\""
+  else
+    NPM_CMD=npm
+    NODE_EXE=node
+  fi
+}
 
 # Compilation
-# ----------
+# ------------
 
 # Install Meteor
 if [ ! -d "$LOCALAPPDATA/.meteor" ]; then
@@ -94,6 +122,7 @@ underscore -i package.json extend "{ main: '../../main.js', scripts: { start: 'n
 rm package.json
 cmd //c rename temp-package.json package.json
 
+##################################################################################################################################
 # Deployment
 # ----------
 
@@ -105,7 +134,10 @@ if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
   exitWithMessageOnError "Kudu Sync failed"
 fi
 
-# 2. Install npm packages
+# 2. Select node version
+selectNodeVersion
+
+# 3. Install npm packages
 if [ -e "$DEPLOYMENT_TARGET/programs/server/package.json" ]; then
   cd "$DEPLOYMENT_TARGET/programs/server"
   cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" npm install --production
@@ -114,13 +146,4 @@ if [ -e "$DEPLOYMENT_TARGET/programs/server/package.json" ]; then
 fi
 
 ##################################################################################################################################
-
-# Post deployment stub
-if [[ -n "$POST_DEPLOYMENT_ACTION" ]]; then
-  POST_DEPLOYMENT_ACTION=${POST_DEPLOYMENT_ACTION//\"}
-  cd "${POST_DEPLOYMENT_ACTION_DIR%\\*}"
-  "$POST_DEPLOYMENT_ACTION"
-  exitWithMessageOnError "post deployment action failed"
-fi
-
 echo "Finished successfully."
