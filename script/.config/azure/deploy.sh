@@ -110,24 +110,11 @@ if [ ! -e "$LOCALAPPDATA\.meteor\meteor.bat" ]; then
   rm meteor.tar.gz
 fi
 
-# Install Underscore CLI
-if ! hash underscore 2>/dev/null; then
-  echo meteor-azure: Installing Underscore CLI
-  cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" npm install -g underscore-cli
-fi
-
 # Generate Meteor build
 echo meteor-azure: Building app
 cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" npm install --production
 cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" build "$DEPLOYMENT_TEMP\output" --directory
 cp .config/azure/web.config "$DEPLOYMENT_TEMP\output\bundle"
-
-# Add entry-point
-echo meteor-azure: Preparing package.json
-cd "$DEPLOYMENT_TEMP\output\bundle\programs\server"
-underscore -i package.json extend "{ main: '../../main.js', scripts: { start: 'node ../../main' } }" -o temp-package.json
-rm package.json
-cmd //c rename temp-package.json package.json
 
 ##################################################################################################################################
 # Deployment
@@ -147,7 +134,21 @@ selectNodeVersion
 # 3. Install npm packages
 if [ -e "$DEPLOYMENT_TARGET/programs/server/package.json" ]; then
   cd "$DEPLOYMENT_TARGET/programs/server"
-  cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" npm install --production
+
+  # Install JSON tool
+  if ! hash json 2>/dev/null; then
+    echo meteor-azure: Installing JSON tool
+    eval $NPM_CMD install -g json
+  fi
+
+  # Prepare package.json
+  echo meteor-azure: Preparing package.json
+  json -f package.json -e "this.main='../../main.js';this.scripts={ start: 'node ../../main' }" > temp-package.json
+  rm package.json
+  cmd //c rename temp-package.json package.json
+
+  echo meteor-azure: Installing NPM packages
+  eval $NPM_CMD install --production
   exitWithMessageOnError "npm failed"
   cd - > /dev/null
 fi
