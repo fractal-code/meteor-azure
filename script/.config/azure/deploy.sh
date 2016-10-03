@@ -103,8 +103,8 @@ selectNodeVersion () {
 # ------------
 
 # Ensure working directory is clean
-if [ -d "$DEPLOYMENT_TEMP\output" ]; then
-  rm -rf "$DEPLOYMENT_TEMP\output"
+if [ -d "$LOCALAPPDATA\meteor-azure" ]; then
+  rm -rf "$LOCALAPPDATA\meteor-azure"
 fi
 
 # Install Meteor
@@ -118,8 +118,8 @@ fi
 # Generate Meteor build
 echo meteor-azure: Building app
 cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" npm install --production
-cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" build "$DEPLOYMENT_TEMP\output" --directory
-cp .config/azure/web.config "$DEPLOYMENT_TEMP\output\bundle"
+cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" build "$LOCALAPPDATA\meteor-azure" --directory
+cp .config/azure/web.config "$LOCALAPPDATA\meteor-azure\bundle"
 
 ##################################################################################################################################
 # Deployment
@@ -129,7 +129,7 @@ echo Handling node.js deployment.
 
 # 1. KuduSync
 if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
-  "$KUDU_SYNC_CMD" -v 50 -f "$DEPLOYMENT_TEMP\output\bundle" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;.config"
+  "$KUDU_SYNC_CMD" -v 50 -f "$LOCALAPPDATA\meteor-azure\bundle" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;.config"
   exitWithMessageOnError "Kudu Sync failed"
 fi
 
