@@ -10,7 +10,7 @@ Git-based Meteor deployments on Azure App Service
     * Web sockets - On
     * ARR Affinity - On
 4. Following App Settings:
-    * SCM_COMMAND_IDLE_TIMEOUT - 900
+    * SCM_COMMAND_IDLE_TIMEOUT - 3600
     * MONGO_URL - (MongoDB connection string)
     * MONGO_OPLOG_URL - (Optional: Recommended with multiple instances) 
     * ROOT_URL - http://{sitename}.azurewebsites.net or your custom domain if you've set that up
