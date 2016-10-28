@@ -102,6 +102,8 @@ selectNodeVersion () {
 # Compilation
 # ------------
 
+selectNodeVersion
+
 # Ensure working directory is clean
 if [ -d "$LOCALAPPDATA\meteor-azure" ]; then
   rm -rf "$LOCALAPPDATA\meteor-azure"
@@ -117,7 +119,7 @@ fi
 
 # Generate Meteor build
 echo meteor-azure: Building app
-cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" npm install --production
+eval $NPM_CMD install --production
 cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" build "$LOCALAPPDATA\meteor-azure" --directory
 cp .config/azure/web.config "$LOCALAPPDATA\meteor-azure\bundle"
 
@@ -133,14 +135,11 @@ if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
   exitWithMessageOnError "Kudu Sync failed"
 fi
 
-# 2. Select node version
-selectNodeVersion
-
-# 3. Install npm packages
+# 2. Install npm packages
 if [ -e "$DEPLOYMENT_TARGET/programs/server/package.json" ]; then
   cd "$DEPLOYMENT_TARGET/programs/server"
 
-  # Install JSON tool
+  # Ensure JSON tool is installed
   if ! hash json 2>/dev/null; then
     echo meteor-azure: Installing JSON tool
     eval $NPM_CMD install -g json
