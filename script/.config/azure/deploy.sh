@@ -104,6 +104,11 @@ selectNodeVersion () {
 
 selectNodeVersion
 
+# Set NPM version
+echo meteor-azure: Setting NPM version
+eval $NPM_CMD install -g npm@"$METEOR_AZURE_NPM_VERSION"
+exitWithMessageOnError "setting npm version failed"
+
 # Ensure working directory is clean
 if [ -d "$LOCALAPPDATA\meteor-azure" ]; then
   rm -rf "$LOCALAPPDATA\meteor-azure"

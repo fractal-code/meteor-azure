@@ -16,6 +16,7 @@ Git-based Meteor deployments on Azure App Service
     * ROOT_URL - http://{sitename}.azurewebsites.net or your custom domain if you've set that up
     * METEOR_SETTINGS - (Optional: e.g from your settings.json)
     * WEBSITE_NODE_DEFAULT_VERSION - (Node version bundled with your current Meteor release)
+    * METEOR_AZURE_NPM_VERSION - (NPM version bundled with your current Meteor release)
 
 ### Setup instructions
 
