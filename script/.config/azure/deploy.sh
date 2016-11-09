@@ -108,6 +108,7 @@ selectNodeVersion
 echo meteor-azure: Setting NPM version
 eval $NPM_CMD install -g npm@"$METEOR_AZURE_NPM_VERSION"
 exitWithMessageOnError "setting npm version failed"
+npm --version
 
 # Ensure working directory is clean
 if [ -d "$LOCALAPPDATA\meteor-azure" ]; then
@@ -124,7 +125,7 @@ fi
 
 # Generate Meteor build
 echo meteor-azure: Building app
-eval $NPM_CMD install --production
+npm install --production
 cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" build "$LOCALAPPDATA\meteor-azure" --directory
 cp .config/azure/web.config "$LOCALAPPDATA\meteor-azure\bundle"
 
@@ -147,7 +148,7 @@ if [ -e "$DEPLOYMENT_TARGET/programs/server/package.json" ]; then
   # Ensure JSON tool is installed
   if ! hash json 2>/dev/null; then
     echo meteor-azure: Installing JSON tool
-    eval $NPM_CMD install -g json
+    npm install -g json
   fi
 
   # Prepare package.json
@@ -157,7 +158,7 @@ if [ -e "$DEPLOYMENT_TARGET/programs/server/package.json" ]; then
   cmd //c rename temp-package.json package.json
 
   echo meteor-azure: Installing NPM packages
-  eval $NPM_CMD install --production
+  npm install --production
   exitWithMessageOnError "npm failed"
   cd - > /dev/null
 fi
