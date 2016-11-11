@@ -133,13 +133,10 @@ cp .config/azure/web.config "$LOCALAPPDATA\meteor-azure\bundle"
 # Deployment
 # ----------
 
-echo Handling node.js deployment.
-
-# 1. KuduSync
-if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
-  "$KUDU_SYNC_CMD" -v 50 -f "$LOCALAPPDATA\meteor-azure\bundle" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;.config"
-  exitWithMessageOnError "Kudu Sync failed"
-fi
+# 1. Sync bundle
+echo meteor-azure: Deploying bundle
+cd $LOCALAPPDATA/meteor-azure
+robocopy bundle "$DEPLOYMENT_TARGET" //mir //nfl //ndl //njh //njs //nc //ns //np > /dev/null
 
 # 2. Install npm packages
 if [ -e "$DEPLOYMENT_TARGET/programs/server/package.json" ]; then
