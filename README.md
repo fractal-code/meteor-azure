@@ -1,6 +1,6 @@
 # meteor-azure
 
-Git-based Meteor deployments on Azure App Service
+Automate Meteor deployments on Azure App Service
 
 ### Prerequisites
 
