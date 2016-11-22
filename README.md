@@ -25,7 +25,7 @@ Git-based Meteor deployments on Azure App Service
 
 ### Force HTTPS
 
-Meteor's core [force-ssl](https://atmospherejs.com/meteor/force-ssl) package is incompatible with our setup. You can achieve the same functionality with a rewrite rule in your web.config:
+Meteor's core [force-ssl](https://atmospherejs.com/meteor/force-ssl) package is incompatible with our setup. You can achieve the same functionality with an extra rewrite rule in your web.config (see a full example [here](https://raw.githubusercontent.com/talos-code/meteor-azure-example/master/.config/azure/web.config)):
 
 ```xml
 <!-- Force HTTPS -->
