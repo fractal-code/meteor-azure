@@ -21,31 +21,15 @@ exitWithMessageOnError () {
   fi
 }
 
-# Prerequisites
-# -------------
-
-# Verify node.js installed
-hash node 2>/dev/null
-exitWithMessageOnError "Missing node.js executable, please install node.js, if already installed make sure it can be reached from current environment."
-
 # Setup
 # -----
 
 SCRIPT_DIR="${BASH_SOURCE[0]%\\*}"
 SCRIPT_DIR="${SCRIPT_DIR%/*}"
 ARTIFACTS=$SCRIPT_DIR/../artifacts
-KUDU_SYNC_CMD=${KUDU_SYNC_CMD//\"}
 
 if [[ ! -n "$DEPLOYMENT_SOURCE" ]]; then
   DEPLOYMENT_SOURCE=$SCRIPT_DIR
-fi
-
-if [[ ! -n "$NEXT_MANIFEST_PATH" ]]; then
-  NEXT_MANIFEST_PATH=$ARTIFACTS/manifest
-
-  if [[ ! -n "$PREVIOUS_MANIFEST_PATH" ]]; then
-    PREVIOUS_MANIFEST_PATH=$NEXT_MANIFEST_PATH
-  fi
 fi
 
 if [[ ! -n "$DEPLOYMENT_TARGET" ]]; then
@@ -54,93 +38,81 @@ else
   KUDU_SERVICE=true
 fi
 
-if [[ ! -n "$KUDU_SYNC_CMD" ]]; then
-  # Install kudu sync
-  echo Installing Kudu Sync
-  npm install kudusync -g --silent
-  exitWithMessageOnError "npm failed"
-
-  if [[ ! -n "$KUDU_SERVICE" ]]; then
-    # In case we are running locally this is the correct location of kuduSync
-    KUDU_SYNC_CMD=kuduSync
-  else
-    # In case we are running on kudu service this is the correct location of kuduSync
-    KUDU_SYNC_CMD=$APPDATA/npm/node_modules/kuduSync/bin/kuduSync
-  fi
-fi
-
-# Node Helpers
+# Prerequisites
 # ------------
 
-selectNodeVersion () {
-  if [[ -n "$KUDU_SELECT_NODE_VERSION_CMD" ]]; then
-    SELECT_NODE_VERSION="$KUDU_SELECT_NODE_VERSION_CMD \"$DEPLOYMENT_SOURCE\" \"$DEPLOYMENT_TARGET\" \"$DEPLOYMENT_TEMP\""
-    eval $SELECT_NODE_VERSION
-    exitWithMessageOnError "select node version failed"
+# Prepare installation scope
+if [ ! -d D:/home/meteor-azure ];
+  then mkdir D:/home/meteor-azure
+fi
+cd D:/home/meteor-azure;
 
-    if [[ -e "$DEPLOYMENT_TEMP/__nodeVersion.tmp" ]]; then
-      NODE_EXE=`cat "$DEPLOYMENT_TEMP/__nodeVersion.tmp"`
-      exitWithMessageOnError "getting node version failed"
-    fi
+# Install Meteor
+if [ ! -e .meteor/meteor.bat ]; then
+  echo meteor-azure: Installing Meteor
+  curl -L -o meteor.tar.gz "https://packages.meteor.com/bootstrap-link?arch=os.windows.x86_32"
+  tar -zxf meteor.tar.gz
+  rm meteor.tar.gz
+fi
 
-    if [[ -e "$DEPLOYMENT_TEMP/__npmVersion.tmp" ]]; then
-      NPM_JS_PATH=`cat "$DEPLOYMENT_TEMP/__npmVersion.tmp"`
-      exitWithMessageOnError "getting npm version failed"
-    fi
+# Install NVM
+if [ ! -d nvm ]; then
+  echo meteor-azure: Installing NVM
+  curl -L -o nvm-noinstall.zip "https://github.com/coreybutler/nvm-windows/releases/download/1.1.1/nvm-noinstall.zip"
+  unzip nvm-noinstall.zip -d nvm
+  rm nvm-noinstall.zip
+  (echo root: D:/home/meteor-azure/nvm && echo proxy: none) > nvm/settings.txt
+fi
 
-    if [[ ! -n "$NODE_EXE" ]]; then
-      NODE_EXE=node
-    fi
+# Set Node version
+echo meteor-azure: Setting Node version
+export NVM_HOME=D:/home/meteor-azure/nvm
+nvm/nvm.exe install $METEOR_AZURE_NODE_VERSION 32
+cp "nvm/v$METEOR_AZURE_NODE_VERSION/node32.exe" "nvm/v$METEOR_AZURE_NODE_VERSION/node.exe"
+export PATH="$HOME/meteor-azure/nvm/v$METEOR_AZURE_NODE_VERSION:$PATH"
+echo "meteor-azure: Now using Node $(node -v) (32-bit)"
 
-    NPM_CMD="\"$NODE_EXE\" \"$NPM_JS_PATH\""
-  else
-    NPM_CMD=npm
-    NODE_EXE=node
-  fi
-}
+# Set NPM version
+echo meteor-azure: Setting NPM version
+if [ "$(npm -v)" != "$METEOR_AZURE_NPM_VERSION" ]; then
+  cmd //c npm install -g "npm@$METEOR_AZURE_NPM_VERSION"
+  exitWithMessageOnError "setting npm version failed"
+fi
+echo "meteor-azure: Now using NPM v$(npm -v)"
 
 # Compilation
 # ------------
 
-selectNodeVersion
-
-# Set NPM version
-echo meteor-azure: Setting NPM version
-eval $NPM_CMD install -g npm@"$METEOR_AZURE_NPM_VERSION"
-exitWithMessageOnError "setting npm version failed"
-npm --version
+cd "$DEPLOYMENT_SOURCE"
 
 # Ensure working directory is clean
 if [ -d "$LOCALAPPDATA\meteor-azure" ]; then
   rm -rf "$LOCALAPPDATA\meteor-azure"
 fi
 
-# Install Meteor
-if [ ! -e "$LOCALAPPDATA\.meteor\meteor.bat" ]; then
-  echo meteor-azure: Installing Meteor
-  curl -L -o meteor.tar.gz "https://packages.meteor.com/bootstrap-link?arch=os.windows.x86_32"
-  tar -zxf meteor.tar.gz -C "$LOCALAPPDATA"
-  rm meteor.tar.gz
-fi
-
 # Generate Meteor build
 echo meteor-azure: Building app
 npm install --production
-cmd //c "$LOCALAPPDATA\.meteor\meteor.bat" build "$LOCALAPPDATA\meteor-azure" --directory
+cmd //c D:/home/meteor-azure/.meteor/meteor.bat build "$LOCALAPPDATA\meteor-azure" --directory
 cp .config/azure/web.config "$LOCALAPPDATA\meteor-azure\bundle"
 
 ##################################################################################################################################
 # Deployment
 # ----------
 
-# 1. Sync bundle
+# 1. Set Node runtime
+echo meteor-azure: Setting Node runtime
+cd "$LOCALAPPDATA\meteor-azure\bundle"
+(echo nodeProcessCommandLine: "D:\home\meteor-azure\nvm\v$METEOR_AZURE_NODE_VERSION\node.exe") > iisnode.yml
+
+# 2. Sync bundle
 echo meteor-azure: Deploying bundle
-cd $LOCALAPPDATA/meteor-azure
+cd "$LOCALAPPDATA\meteor-azure"
 robocopy bundle "$DEPLOYMENT_TARGET" //mir //nfl //ndl //njh //njs //nc //ns //np > /dev/null
 
-# 2. Install npm packages
-if [ -e "$DEPLOYMENT_TARGET/programs/server/package.json" ]; then
-  cd "$DEPLOYMENT_TARGET/programs/server"
+# 3. Install NPM packages
+if [ -e "$DEPLOYMENT_TARGET\programs\server\package.json" ]; then
+  cd "$DEPLOYMENT_TARGET\programs\server"
 
   # Ensure JSON tool is installed
   if ! hash json 2>/dev/null; then
@@ -161,4 +133,4 @@ if [ -e "$DEPLOYMENT_TARGET/programs/server/package.json" ]; then
 fi
 
 ##################################################################################################################################
-echo "meteor-azure: Finished successfully."
+echo meteor-azure: Finished successfully
