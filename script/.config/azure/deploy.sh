@@ -68,7 +68,9 @@ fi
 echo meteor-azure: Setting Node version
 export NVM_HOME=D:/home/meteor-azure/nvm
 nvm/nvm.exe install $METEOR_AZURE_NODE_VERSION 32
-cp "nvm/v$METEOR_AZURE_NODE_VERSION/node32.exe" "nvm/v$METEOR_AZURE_NODE_VERSION/node.exe"
+if [ ! -e "nvm/v$METEOR_AZURE_NODE_VERSION/node.exe" ]; then
+  cp "nvm/v$METEOR_AZURE_NODE_VERSION/node32.exe" "nvm/v$METEOR_AZURE_NODE_VERSION/node.exe"
+fi
 export PATH="$HOME/meteor-azure/nvm/v$METEOR_AZURE_NODE_VERSION:$PATH"
 echo "meteor-azure: Now using Node $(node -v) (32-bit)"
 
