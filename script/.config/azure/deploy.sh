@@ -41,6 +41,29 @@ fi
 # Prerequisites
 # ------------
 
+# Validate configuration
+if [ -e "$DEPLOYMENT_SOURCE\iisnode.yml" ]; then
+  echo "meteor-azure: WARNING! iisnode.yml will not be respected, please move configuration to web.config"
+fi
+if [ ! -e "$DEPLOYMENT_SOURCE\.config\azure\web.config" ]; then
+  echo "meteor-azure: WARNING! No web.config was found (app may not start properly)"
+fi
+if [ $SCM_COMMAND_IDLE_TIMEOUT != 7200 ]; then
+  echo "meteor-azure: WARNING! Not using recommended 'SCM_COMMAND_IDLE_TIMEOUT' (build may abort unexpectedly)"
+fi
+if [[ ! -v METEOR_AZURE_NODE_VERSION ]]; then
+  echo "meteor-azure: ERROR! You must specify App Setting 'METEOR_AZURE_NODE_VERSION'"
+  exit 1
+fi
+if [[ ! -v METEOR_AZURE_NPM_VERSION ]]; then
+  echo "meteor-azure: ERROR! You must specify App Setting 'METEOR_AZURE_NPM_VERSION'"
+  exit 1
+fi
+if [[ ! -v ROOT_URL ]]; then
+  echo "meteor-azure: ERROR! You must specify App Setting 'ROOT_URL'"
+  exit 1
+fi
+
 # Prepare installation scope
 if [ ! -d D:/home/meteor-azure ];
   then mkdir D:/home/meteor-azure
