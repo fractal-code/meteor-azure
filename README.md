@@ -10,7 +10,7 @@ Automate Meteor deployments on Azure App Service
     * Web sockets - On
     * ARR Affinity - On
 4. Following App Settings:
-    * SCM_COMMAND_IDLE_TIMEOUT - 3600
+    * SCM_COMMAND_IDLE_TIMEOUT - 7200
     * METEOR_AZURE_NODE_VERSION - (Node version bundled with your current Meteor release)
     * METEOR_AZURE_NPM_VERSION - (NPM version bundled with your current Meteor release)
     * MONGO_URL - (MongoDB connection string)
