@@ -18,7 +18,7 @@ Automate Meteor deployments on Azure App Service
     * MONGO_OPLOG_URL - Optional: Recommended with multiple instances
     * METEOR_SETTINGS - Optional: e.g from your settings.json
     * METEOR_AZURE_ROOT - Optional: Path to your .meteor directory **IF** it's nested (format as "foo\bar\\")
-    * METEOR_AZURE_NOCACHE - Optional: Clears cache when set to any value (increases build times)
+    * METEOR_AZURE_NOCACHE - Optional: Set any value to enable (increases build time significantly)
 
 ### Setup instructions
 
