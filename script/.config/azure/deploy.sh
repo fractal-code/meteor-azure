@@ -51,6 +51,9 @@ fi
 if [ $SCM_COMMAND_IDLE_TIMEOUT != 7200 ]; then
   echo "meteor-azure: WARNING! Not using recommended 'SCM_COMMAND_IDLE_TIMEOUT' (build may abort unexpectedly)"
 fi
+if [[ -v METEOR_AZURE_NOCACHE ]]; then
+  echo "meteor-azure: WARNING! 'METEOR_AZURE_NOCACHE' is enabled (this will increase build times)"
+fi
 if [ ! -d "$DEPLOYMENT_SOURCE\\$METEOR_AZURE_ROOT.meteor" ]; then
   echo "meteor-azure: ERROR! Could not find Meteor project directory (consider specifying 'METEOR_AZURE_ROOT')"
   exit 1
@@ -69,8 +72,12 @@ if [[ ! -v ROOT_URL ]]; then
 fi
 
 # Prepare installation scope
-if [ ! -d D:/home/meteor-azure ];
-  then mkdir D:/home/meteor-azure
+if [[ -v METEOR_AZURE_NOCACHE && -d D:/home/meteor-azure ]]; then
+  echo "meteor-azure: Clearing cache"
+  rm -rf D:/home/meteor-azure
+fi
+if [ ! -d D:/home/meteor-azure ]; then
+  mkdir D:/home/meteor-azure
 fi
 cd D:/home/meteor-azure;
 
