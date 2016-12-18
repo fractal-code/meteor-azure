@@ -127,46 +127,41 @@ fi
 
 cd "$DEPLOYMENT_SOURCE\\$METEOR_AZURE_ROOT"
 
-# Ensure working directory is clean
-if [ -d "$LOCALAPPDATA\meteor-azure" ]; then
-  rm -rf "$LOCALAPPDATA\meteor-azure"
-fi
-
 # Install NPM dependencies
 echo meteor-azure: Installing NPM dependencies
 npm install --production
 
 # Generate Meteor build
 echo meteor-azure: Building app
-cmd //c D:/home/meteor-azure/.meteor/meteor.bat build "$LOCALAPPDATA\meteor-azure" --directory
-cp "$DEPLOYMENT_SOURCE\.config\azure\web.config" "$LOCALAPPDATA\meteor-azure\bundle"
-
-##################################################################################################################################
-# Deployment
-# ----------
+if [ -d "$DEPLOYMENT_TEMP\bundle" ]; then
+  echo meteor-azure: Cleaning build directory
+  rm -rf "$DEPLOYMENT_TEMP\bundle"
+fi
+cmd //c meteor build "%DEPLOYMENT_TEMP%" --directory --server-only
+cp "$DEPLOYMENT_SOURCE\.config\azure\web.config" "$DEPLOYMENT_TEMP\bundle"
 
 # Set Node runtime
 echo meteor-azure: Setting Node runtime
-cd "$LOCALAPPDATA\meteor-azure\bundle"
+cd "$DEPLOYMENT_TEMP\bundle"
 (echo nodeProcessCommandLine: "D:\home\meteor-azure\nvm\v$METEOR_AZURE_NODE_VERSION\node.exe") > iisnode.yml
-
-# Sync bundle
-echo meteor-azure: Deploying bundle
-cd "$LOCALAPPDATA\meteor-azure"
-robocopy bundle "$DEPLOYMENT_TARGET" //mir //nfl //ndl //njh //njs //nc //ns //np > /dev/null
-
-cd "$DEPLOYMENT_TARGET\programs\server"
 
 # Set entry-point
 echo meteor-azure: Setting entry-point
+cd "$DEPLOYMENT_TEMP\bundle\programs\server"
 json -f package.json -e "this.main='../../main.js';this.scripts={ start: 'node ../../main' }" > temp-package.json
 rm package.json
 cmd //c rename temp-package.json package.json
 
+# Deployment
+# ----------
+
+# Sync bundle
+echo meteor-azure: Deploying bundle
+robocopy "$DEPLOYMENT_TEMP\bundle" $DEPLOYMENT_TARGET //mir //nfl //ndl //njh //njs //nc //ns //np > /dev/null
+
 # Install Meteor server
 echo meteor-azure: Installing Meteor server
+cd "$DEPLOYMENT_TARGET\programs\server"
 npm install --production
-exitWithMessageOnError "npm failed"
 
-##################################################################################################################################
 echo meteor-azure: Finished successfully
