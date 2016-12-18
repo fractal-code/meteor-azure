@@ -132,9 +132,12 @@ if [ -d "$LOCALAPPDATA\meteor-azure" ]; then
   rm -rf "$LOCALAPPDATA\meteor-azure"
 fi
 
+# Install NPM dependencies
+echo meteor-azure: Installing NPM dependencies
+npm install --production
+
 # Generate Meteor build
 echo meteor-azure: Building app
-npm install --production
 cmd //c D:/home/meteor-azure/.meteor/meteor.bat build "$LOCALAPPDATA\meteor-azure" --directory
 cp "$DEPLOYMENT_SOURCE\.config\azure\web.config" "$LOCALAPPDATA\meteor-azure\bundle"
 
@@ -142,31 +145,28 @@ cp "$DEPLOYMENT_SOURCE\.config\azure\web.config" "$LOCALAPPDATA\meteor-azure\bun
 # Deployment
 # ----------
 
-# 1. Set Node runtime
+# Set Node runtime
 echo meteor-azure: Setting Node runtime
 cd "$LOCALAPPDATA\meteor-azure\bundle"
 (echo nodeProcessCommandLine: "D:\home\meteor-azure\nvm\v$METEOR_AZURE_NODE_VERSION\node.exe") > iisnode.yml
 
-# 2. Sync bundle
+# Sync bundle
 echo meteor-azure: Deploying bundle
 cd "$LOCALAPPDATA\meteor-azure"
 robocopy bundle "$DEPLOYMENT_TARGET" //mir //nfl //ndl //njh //njs //nc //ns //np > /dev/null
 
-# 3. Install NPM packages
-if [ -e "$DEPLOYMENT_TARGET\programs\server\package.json" ]; then
-  cd "$DEPLOYMENT_TARGET\programs\server"
+cd "$DEPLOYMENT_TARGET\programs\server"
 
-  # Prepare package.json
-  echo meteor-azure: Preparing package.json
-  json -f package.json -e "this.main='../../main.js';this.scripts={ start: 'node ../../main' }" > temp-package.json
-  rm package.json
-  cmd //c rename temp-package.json package.json
+# Set entry-point
+echo meteor-azure: Setting entry-point
+json -f package.json -e "this.main='../../main.js';this.scripts={ start: 'node ../../main' }" > temp-package.json
+rm package.json
+cmd //c rename temp-package.json package.json
 
-  echo meteor-azure: Installing NPM packages
-  npm install --production
-  exitWithMessageOnError "npm failed"
-  cd - > /dev/null
-fi
+# Install Meteor server
+echo meteor-azure: Installing Meteor server
+npm install --production
+exitWithMessageOnError "npm failed"
 
 ##################################################################################################################################
 echo meteor-azure: Finished successfully
