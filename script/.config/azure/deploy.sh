@@ -10,17 +10,6 @@
 # Version: 1.0.8
 # ----------------------
 
-# Helpers
-# -------
-
-exitWithMessageOnError () {
-  if [ ! $? -eq 0 ]; then
-    echo "An error has occurred during web site deployment."
-    echo $1
-    exit 1
-  fi
-}
-
 # Setup
 # -----
 
@@ -112,7 +101,6 @@ echo "meteor-azure: Now using Node $(node -v) (32-bit)"
 echo meteor-azure: Setting NPM version
 if [ "$(npm -v)" != "$METEOR_AZURE_NPM_VERSION" ]; then
   cmd //c npm install -g "npm@$METEOR_AZURE_NPM_VERSION"
-  exitWithMessageOnError "setting npm version failed"
 fi
 echo "meteor-azure: Now using NPM v$(npm -v)"
 
@@ -120,6 +108,20 @@ echo "meteor-azure: Now using NPM v$(npm -v)"
 if ! hash json 2>/dev/null; then
   echo meteor-azure: Installing JSON tool
   npm install -g json
+fi
+
+# Validate setup
+if [ "$(node -v)" != "v$METEOR_AZURE_NODE_VERSION" ]; then
+  echo "ERROR! Could not install Node"
+  exit 1
+fi
+if [ "$(npm -v)" != "$METEOR_AZURE_NPM_VERSION" ]; then
+  echo "ERROR! Could not install NPM"
+  exit 1
+fi
+if ! hash json 2>/dev/null; then
+  echo "ERROR! Could not install JSON tool"
+  exit 1
 fi
 
 # Compilation
