@@ -116,6 +116,12 @@ if [ "$(npm -v)" != "$METEOR_AZURE_NPM_VERSION" ]; then
 fi
 echo "meteor-azure: Now using NPM v$(npm -v)"
 
+# Install JSON tool
+if ! hash json 2>/dev/null; then
+  echo meteor-azure: Installing JSON tool
+  npm install -g json
+fi
+
 # Compilation
 # ------------
 
@@ -149,12 +155,6 @@ robocopy bundle "$DEPLOYMENT_TARGET" //mir //nfl //ndl //njh //njs //nc //ns //n
 # 3. Install NPM packages
 if [ -e "$DEPLOYMENT_TARGET\programs\server\package.json" ]; then
   cd "$DEPLOYMENT_TARGET\programs\server"
-
-  # Ensure JSON tool is installed
-  if ! hash json 2>/dev/null; then
-    echo meteor-azure: Installing JSON tool
-    npm install -g json
-  fi
 
   # Prepare package.json
   echo meteor-azure: Preparing package.json
