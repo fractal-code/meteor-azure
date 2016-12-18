@@ -10,8 +10,8 @@
 # Version: 1.0.8
 # ----------------------
 
-# Setup
-# -----
+# Environment
+# ------
 
 SCRIPT_DIR="${BASH_SOURCE[0]%\\*}"
 SCRIPT_DIR="${SCRIPT_DIR%/*}"
@@ -26,9 +26,6 @@ if [[ ! -n "$DEPLOYMENT_TARGET" ]]; then
 else
   KUDU_SERVICE=true
 fi
-
-# Prerequisites
-# ------------
 
 # Validate configuration
 if [ -e "$DEPLOYMENT_SOURCE\.config\azure\iisnode.yml" ]; then
@@ -60,7 +57,7 @@ if [[ ! -v ROOT_URL ]]; then
   exit 1
 fi
 
-# Prepare installation scope
+# Prepare cache directory
 if [[ -v METEOR_AZURE_NOCACHE && -d D:/home/meteor-azure ]]; then
   echo "meteor-azure: Clearing cache"
   rm -rf D:/home/meteor-azure
@@ -68,6 +65,10 @@ fi
 if [ ! -d D:/home/meteor-azure ]; then
   mkdir D:/home/meteor-azure
 fi
+
+# Setup
+# ------------
+
 cd D:/home/meteor-azure;
 
 # Install Meteor
@@ -77,6 +78,7 @@ if [ ! -e .meteor/meteor.bat ]; then
   tar -zxf meteor.tar.gz
   rm meteor.tar.gz
 fi
+export PATH="$HOME/meteor-azure/.meteor:$PATH"
 
 # Install NVM
 if [ ! -d nvm ]; then
@@ -87,7 +89,7 @@ if [ ! -d nvm ]; then
   (echo root: D:/home/meteor-azure/nvm && echo proxy: none) > nvm/settings.txt
 fi
 
-# Set Node version
+# Install custom Node
 echo meteor-azure: Setting Node version
 export NVM_HOME=D:/home/meteor-azure/nvm
 nvm/nvm.exe install $METEOR_AZURE_NODE_VERSION 32
@@ -97,7 +99,7 @@ fi
 export PATH="$HOME/meteor-azure/nvm/v$METEOR_AZURE_NODE_VERSION:$PATH"
 echo "meteor-azure: Now using Node $(node -v) (32-bit)"
 
-# Set NPM version
+# Install custom NPM
 echo meteor-azure: Setting NPM version
 if [ "$(npm -v)" != "$METEOR_AZURE_NPM_VERSION" ]; then
   cmd //c npm install -g "npm@$METEOR_AZURE_NPM_VERSION"
