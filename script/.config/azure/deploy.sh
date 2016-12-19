@@ -133,6 +133,7 @@ cd "$DEPLOYMENT_SOURCE\\$METEOR_AZURE_ROOT"
 
 # Install NPM dependencies
 echo meteor-azure: Installing NPM dependencies
+npm prune --production
 npm install --production
 
 # Generate Meteor build
