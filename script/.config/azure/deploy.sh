@@ -59,7 +59,7 @@ fi
 
 # Prepare cache directory
 if [[ -v METEOR_AZURE_NOCACHE && -d D:/home/meteor-azure ]]; then
-  echo "meteor-azure: Clearing cache"
+  echo meteor-azure: Clearing cache
   rm -rf D:/home/meteor-azure
 fi
 if [ ! -d D:/home/meteor-azure ]; then
