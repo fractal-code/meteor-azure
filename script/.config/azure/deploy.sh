@@ -166,7 +166,7 @@ cmd //c rename temp-package.json package.json
 
 # Sync bundle
 echo meteor-azure: Deploying bundle
-robocopy "$DEPLOYMENT_TEMP\bundle" $DEPLOYMENT_TARGET //mt:16 //mir //nfl //ndl //njh //njs //nc //ns //np > /dev/null
+robocopy "$DEPLOYMENT_TEMP\bundle" $DEPLOYMENT_TARGET //mt //mir //nfl //ndl //njh //njs //nc //ns //np > /dev/null
 
 # Install Meteor server
 echo meteor-azure: Installing Meteor server
