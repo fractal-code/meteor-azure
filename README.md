@@ -11,8 +11,10 @@ Automate Meteor deployments on Azure App Service
     * ARR Affinity - On
 4. Following App Settings:
     * SCM_COMMAND_IDLE_TIMEOUT - 7200
-    * METEOR_AZURE_NODE_VERSION - Node version bundled with your current Meteor release
+    * METEOR_AZURE_NODE_VERSION - Node version bundled with your current Meteor release 
+      go to your app directory and run: meteor node --version
     * METEOR_AZURE_NPM_VERSION - NPM version bundled with your current Meteor release
+      go to your app directory and run: meteor --version
     * ROOT_URL - http://{sitename}.azurewebsites.net or a custom domain you've set up
     * MONGO_URL - MongoDB connection string
     * MONGO_OPLOG_URL - Optional: Recommended with multiple instances
