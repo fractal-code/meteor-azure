@@ -48,7 +48,20 @@ NPM version bundled with your current Meteor release
 
 ## Setup Repository instructions
 
-1. Copy the contents of the ```script``` directory into the top-level of your repository
+1. Copy the **contents** of the ```script``` directory into the top-level of your repository, so that your directory will look like:
+
+
+```shell
+.config/
+imports/
+client/
+server/
+.deployment
+```
+  
+   
+You can also put your Meteor Files into a subdirectory like in the example repository. If you do so you need to set METEOR_AZURE_ROOT in your App Settings
+
 2. Configure a deployment source in the Azure portal ([detailed instructions](https://azure.microsoft.com/en-us/documentation/articles/app-service-continuous-deployment)) 
 
 ## Force HTTPS
