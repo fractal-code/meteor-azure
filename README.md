@@ -18,7 +18,7 @@ ARR Affinity - On`
 
 ### App Settings
 
-![App Service](AppSettings.JPG)
+![App Service]()
 
 
 Delete any existing App settings and set the following settings:
