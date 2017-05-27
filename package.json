@@ -54,5 +54,8 @@
     "tmp": "0.0.31",
     "update-notifier": "^2.1.0",
     "winston": "^2.3.1"
+  },
+  "engines": {
+    "node": ">=4"
   }
 }
