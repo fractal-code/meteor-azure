@@ -99,7 +99,7 @@ export default class AzureMethods {
       url: '/deploy?isAsync=true',
       data: {
         format: 'basic',
-        url: 'https://github.com/talos-code/meteor-azure-server-init.git',
+        url: 'https://github.com/fractal-code/meteor-azure-server-init.git',
       },
     });
 
