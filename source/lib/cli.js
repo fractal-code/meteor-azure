@@ -1,10 +1,7 @@
 // CLI setup
 
-import defaultTo from 'lodash.defaultto';
 import program from 'commander';
 import jsonfile from 'jsonfile';
-import path from 'path';
-import pkgDir from 'pkg-dir';
 import shell from 'shelljs';
 import updateNotifier from 'update-notifier';
 import winston from 'winston';
@@ -44,11 +41,8 @@ export default async function startup() {
     await azureMethods.authenticate();
     await azureMethods.updateApplicationSettings();
 
-    const resourcesDir = path.join(pkgDir.sync(__dirname), 'resources');
-    const webConfigFile = defaultTo(program['web-config'], path.join(resourcesDir, 'web.config'));
-    await azureMethods.deployBundle({
-      bundleFile: compileBundle({ webConfigFile }),
-    });
+    const bundleFile = compileBundle({ customWebConfig: program.webConfig });
+    await azureMethods.deployBundle({ bundleFile });
   } catch (error) {
     winston.error(error.message);
     process.exit(1);
