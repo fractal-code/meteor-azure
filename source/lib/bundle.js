@@ -11,10 +11,6 @@ export default function compileBundle({ customWebConfig }) {
 
   winston.info('Compiling application bundle');
 
-  // Install project NPM dependencies
-  winston.debug('install NPM dependencies');
-  shell.exec('meteor npm install --production');
-
   // Generate Meteor build
   winston.debug('generate meteor build');
   shell.exec(`meteor build ${workingDir} --directory --server-only --architecture os.windows.x86_32`);
