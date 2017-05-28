@@ -58,6 +58,7 @@ export default class AzureMethods {
     // Set Kudu deployment settings
     winston.debug('set Kudu deployment settings');
     Object.assign(newSettings.properties, {
+      METEOR_AZURE_TIMESTAMP: Date.now(), // abort incomplete deploy
       SCM_COMMAND_IDLE_TIMEOUT: 3600,
       SCM_TOUCH_WEBCONFIG_AFTER_DEPLOYMENT: 0,
     });
