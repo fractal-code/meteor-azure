@@ -23,6 +23,9 @@ program
 // Pretty print logs
 winston.cli();
 
+// Terminate on shell error
+shell.config.fatal = true;
+
 // Quiet mode
 if (program.quiet === true) {
   winston.level = 'error';
