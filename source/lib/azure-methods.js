@@ -118,7 +118,7 @@ export default class AzureMethods {
     if (progress.data.status === 4) {
       winston.info('Finished successfully');
     } else {
-      throw Error('An error occurred during server initialisation');
+      throw new Error('Could not complete server initialisation');
     }
   }
 }
