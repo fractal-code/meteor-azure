@@ -13,10 +13,15 @@ export default class AzureMethods {
   constructor(settingsFile) {
     this.meteorSettings = omit(settingsFile, 'meteor-azure');
     this.settings = settingsFile['meteor-azure'];
+    this.isSlot = (this.settings.slotName !== undefined);
+
+    // Determine Kudu site name
+    let kuduName = this.settings.siteName;
+    if (this.isSlot) { kuduName = `${kuduName}-${this.settings.slotName}`; }
 
     // Configure Kudu API connection
     this.kuduClient = axios.create({
-      baseURL: `https://${this.settings.siteName}.scm.azurewebsites.net`,
+      baseURL: `https://${kuduName}.scm.azurewebsites.net`,
       auth: this.settings.deploymentCreds,
     });
   }
@@ -25,7 +30,7 @@ export default class AzureMethods {
     const { servicePrincipal, tenantId, subscriptionId } = this.settings;
     let credentials;
 
-    if (servicePrincipal) {
+    if (servicePrincipal !== undefined) {
       const { appId, secret } = servicePrincipal;
       winston.info('Authenticating with service principal');
       credentials = await msRest.loginWithServicePrincipalSecret(appId, secret, tenantId);
@@ -39,10 +44,18 @@ export default class AzureMethods {
   }
 
   async updateApplicationSettings() {
-    const { resourceGroup, siteName, envVariables } = this.settings;
-    const newSettings = await this.azureSdk.listApplicationSettings(resourceGroup, siteName);
+    const { resourceGroup, siteName, slotName, envVariables } = this.settings;
+    let newSettings;
 
     winston.info('Updating Azure application settings');
+
+    // Start with current settings
+    if (this.isSlot) {
+      newSettings = await this.azureSdk
+          .listApplicationSettingsSlot(resourceGroup, siteName, slotName);
+    } else {
+      newSettings = await this.azureSdk.listApplicationSettings(resourceGroup, siteName);
+    }
 
     // Set environment variables
     winston.debug('set environment variables');
@@ -81,7 +94,13 @@ export default class AzureMethods {
       });
     });
 
-    await this.azureSdk.updateApplicationSettings(resourceGroup, siteName, newSettings);
+    // Push new settings
+    if (this.isSlot) {
+      await this.azureSdk
+          .updateApplicationSettingsSlot(resourceGroup, siteName, newSettings, slotName);
+    } else {
+      await this.azureSdk.updateApplicationSettings(resourceGroup, siteName, newSettings);
+    }
   }
 
   async deployBundle({ bundleFile }) {
