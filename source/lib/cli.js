@@ -1,13 +1,13 @@
 // CLI setup
 
 import program from 'commander';
-import jsonfile from 'jsonfile';
 import shell from 'shelljs';
 import updateNotifier from 'update-notifier';
 import winston from 'winston';
 import pkg from '../../package.json';
+import { validateSettings, validateMeteor } from './validation';
 import compileBundle from './bundle';
-import AzureMethods from './azure-methods';
+import AzureMethods from './azure';
 
 updateNotifier({ pkg }).notify();
 
@@ -39,13 +39,14 @@ if (program.debug === true) {
 
 export default async function startup() {
   try {
-    const azureMethods = new AzureMethods(jsonfile.readFileSync(program.settings));
-
+    validateMeteor();
+    const settingsFile = validateSettings(program.settings);
+    const azureMethods = new AzureMethods(settingsFile);
     await azureMethods.authenticate();
     await azureMethods.updateApplicationSettings();
-
-    const bundleFile = compileBundle({ customWebConfig: program.webConfig });
-    await azureMethods.deployBundle({ bundleFile });
+    await azureMethods.deployBundle({
+      bundleFile: compileBundle({ customWebConfig: program.webConfig }),
+    });
   } catch (error) {
     winston.error(error.message);
     process.exit(1);

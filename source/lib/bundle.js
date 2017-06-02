@@ -18,7 +18,13 @@ export default function compileBundle({ customWebConfig }) {
   // Add custom web config
   if (customWebConfig !== undefined) {
     winston.debug('add custom web config');
-    shell.cp(customWebConfig, path.join(workingDir, 'bundle'));
+    try {
+      shell.cp(customWebConfig, path.join(workingDir, 'bundle', 'web.config'));
+    } catch (error) {
+      throw new Error(`Could not read web config file at '${customWebConfig}'`);
+    }
+  } else {
+    winston.warn('Using default web config');
   }
 
   // Create tarball
