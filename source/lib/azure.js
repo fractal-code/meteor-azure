@@ -103,7 +103,7 @@ export default class AzureMethods {
     }
   }
 
-  async deployBundle({ bundleFile }) {
+  async deployBundle({ bundleFile, isDebug }) {
     // Upload bundle tarball
     winston.info('Deploying bundle tarball');
     await this.kuduClient({
@@ -131,8 +131,21 @@ export default class AzureMethods {
     do {
       await delay(20000); // 20 second interval
       progress = await this.kuduClient.get(kuduDeploy.headers.location);
-      winston.debug(progress.data);
     } while (progress.data.complete === false);
+
+
+    // Retrieve Kudu deployment log for debug mode
+    if (isDebug === true) {
+      winston.debug('Retrieving Kudu deployment log...');
+      try {
+        const kuduLogs = await this.kuduClient(`/deployments/${progress.data.id}/log`);
+        const logDetailsUrl = kuduLogs.data.find(log => log.details_url !== null).details_url;
+        const logDetails = await this.kuduClient(logDetailsUrl);
+        logDetails.data.forEach(log => winston.debug(log.message));
+      } catch (error) {
+        throw new Error('Could not retrieve deployment log');
+      }
+    }
 
     // Report deploy status
     if (progress.data.status === 4) {

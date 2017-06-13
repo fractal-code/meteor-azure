@@ -46,6 +46,7 @@ export default async function startup() {
     await azureMethods.updateApplicationSettings();
     await azureMethods.deployBundle({
       bundleFile: compileBundle({ customWebConfig: program.webConfig }),
+      isDebug: program.debug,
     });
   } catch (error) {
     winston.error(error.message);
