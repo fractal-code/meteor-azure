@@ -13,7 +13,7 @@
     "build": "babel source --out-dir distribution",
     "dev": "npm-watch",
     "lint": "eslint source",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "rm -rf distribution && npm run build"
   },
   "repository": {
     "type": "git",
