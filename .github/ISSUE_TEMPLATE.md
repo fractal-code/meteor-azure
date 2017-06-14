@@ -2,7 +2,9 @@ Before opening an issue, please check if a similar one already exists or has bee
 
 If you are reporting a bug, please be sure to include the following:
 
-- Script version (listed in .config/azure/deploy.sh)
+- Meteor version
 
-- Deployment log
+- Package version (```meteor-azure -v```)
+
+- Command output in debug mode
 > ```Place inside a fenced code block like this, so it's easy to read```
