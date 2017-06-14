@@ -1,6 +1,9 @@
 ### Babel ###
 source/
 
+### RTD Documentation ###
+documentation/
+
 ### WebStorm ###
 .idea/
 
