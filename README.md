@@ -14,7 +14,7 @@ See the [documentation](http://meteor-azure.readthedocs.io).
 
 ### Support
 
-We welcome your questions and bug reports in the GitHub [issue tracker](https://github.com/fractal-code/meteor-azure/issues).
+We welcome any questions or bug reports in the GitHub [issue tracker](https://github.com/fractal-code/meteor-azure/issues).
 
 ### License
 
