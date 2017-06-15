@@ -4,7 +4,7 @@ If you are reporting a bug, please be sure to include the following:
 
 - Meteor version
 
-- Package version (```meteor-azure -v```)
+- Package version (run `meteor-azure -v`)
 
-- Command output in debug mode
+- Command output with debug mode enabled
 > ```Place inside a fenced code block like this, so it's easy to read```
