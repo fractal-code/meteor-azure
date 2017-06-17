@@ -44,6 +44,7 @@
     "babel-polyfill": "^6.23.0",
     "command-exists": "^1.2.2",
     "commander": "^2.9.0",
+    "core-js": "^2.4.0",
     "joi": "^10.6.0",
     "jsesc": "^2.5.1",
     "jsonfile": "^3.0.0",
