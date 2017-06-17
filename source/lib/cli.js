@@ -12,13 +12,13 @@ import AzureMethods from './azure';
 updateNotifier({ pkg }).notify();
 
 program
-    .description(pkg.description)
-    .version(`v${pkg.version}`, '-v, --version')
-    .option('-s, --settings <path>', 'path to settings file [settings.json]', 'settings.json')
-    .option('-w, --web-config <path>', 'path to custom web.config file')
-    .option('-d, --debug', 'enable debug mode')
-    .option('-q, --quiet', 'enable quite mode')
-    .parse(process.argv);
+  .description(pkg.description)
+  .version(`v${pkg.version}`, '-v, --version')
+  .option('-s, --settings <path>', 'path to settings file [settings.json]', 'settings.json')
+  .option('-w, --web-config <path>', 'path to custom web.config file')
+  .option('-d, --debug', 'enable debug mode')
+  .option('-q, --quiet', 'enable quite mode')
+  .parse(process.argv);
 
 // Pretty print logs
 winston.cli();

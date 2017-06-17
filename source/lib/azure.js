@@ -52,7 +52,7 @@ export default class AzureMethods {
     // Start with current settings
     if (this.isSlot) {
       newSettings = await this.azureSdk
-          .listApplicationSettingsSlot(resourceGroup, siteName, slotName);
+        .listApplicationSettingsSlot(resourceGroup, siteName, slotName);
     } else {
       newSettings = await this.azureSdk.listApplicationSettings(resourceGroup, siteName);
     }
@@ -97,7 +97,7 @@ export default class AzureMethods {
     // Push new settings
     if (this.isSlot) {
       await this.azureSdk
-          .updateApplicationSettingsSlot(resourceGroup, siteName, newSettings, slotName);
+        .updateApplicationSettingsSlot(resourceGroup, siteName, newSettings, slotName);
     } else {
       await this.azureSdk.updateApplicationSettings(resourceGroup, siteName, newSettings);
     }
