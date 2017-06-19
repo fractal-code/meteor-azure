@@ -2,6 +2,8 @@ Before opening an issue, please check if a similar one already exists or has bee
 
 If you are reporting a bug, please be sure to include the following:
 
+- Operating system
+
 - Meteor version
 
 - Package version (run `meteor-azure -v`)
