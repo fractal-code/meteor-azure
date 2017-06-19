@@ -130,7 +130,12 @@ export default class AzureMethods {
     let progress;
     do {
       await delay(20000); // 20 second interval
-      progress = await this.kuduClient.get(kuduDeploy.headers.location);
+      try {
+        progress = await this.kuduClient.get(kuduDeploy.headers.location);
+      } catch (error) {
+        winston.error(error.message);
+        throw new Error('Could not poll server status');
+      }
     } while (progress.data.complete === false);
 
 
@@ -143,6 +148,7 @@ export default class AzureMethods {
         const logDetails = await this.kuduClient(logDetailsUrl);
         logDetails.data.forEach(log => winston.debug(log.message));
       } catch (error) {
+        winston.error(error.message);
         throw new Error('Could not retrieve deployment log');
       }
     }
