@@ -40,6 +40,7 @@ export function validateSettings(path) {
 
 export function validateMeteor() {
   let release;
+  let packages;
 
   // Ensure Meteor CLI is installed
   if (commandExists.sync('meteor') === false) {
@@ -49,6 +50,7 @@ export function validateMeteor() {
   // Determine current Meteor release based on release file
   try {
     release = fs.readFileSync('.meteor/release', 'utf8');
+    packages = fs.readFileSync('.meteor/packages', 'utf8');
   } catch (error) {
     /* Abort the program if a release file is not found, this is a strong
        indication we are not in the root project directory */
@@ -59,6 +61,11 @@ export function validateMeteor() {
   const versionNumbers = release.replace(/[^0-9]/g, '');
   const majorVersion = Number.parseInt(versionNumbers.charAt(0), 10);
   const minorVersion = Number.parseInt(versionNumbers.charAt(1), 10);
+
+  // Ensure application does not have force-ssl
+  if (packages.includes('force-ssl')) {
+    throw new Error('Your app should not use force-ssl package. Please remove it and use the web-config');
+  }
 
   // Ensure current Meteor release is >= 1.4
   if (majorVersion > 1) { return; }
