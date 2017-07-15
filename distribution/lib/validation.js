@@ -61,18 +61,20 @@ function validateSettings(path) {
 
 function validateMeteor() {
   var release = void 0;
+  var packages = void 0;
 
   // Ensure Meteor CLI is installed
   if (_commandExists2.default.sync('meteor') === false) {
     throw new Error('Meteor is not installed');
   }
 
-  // Determine current Meteor release based on release file
+  // Determine current release/packages from '.meteor' directory
   try {
     release = _fs2.default.readFileSync('.meteor/release', 'utf8');
+    packages = _fs2.default.readFileSync('.meteor/packages', 'utf8');
   } catch (error) {
-    /* Abort the program if a release file is not found, this is a strong
-       indication we are not in the root project directory */
+    /* Abort the program if files are not found, this is a strong
+       indication we may not be in the root project directory */
     throw new Error('You must be in a Meteor project directory');
   }
 
@@ -80,6 +82,11 @@ function validateMeteor() {
   var versionNumbers = release.replace(/[^0-9]/g, '');
   var majorVersion = Number.parseInt(versionNumbers.charAt(0), 10);
   var minorVersion = Number.parseInt(versionNumbers.charAt(1), 10);
+
+  // Ensure project does not use 'force-ssl' package
+  if (packages.includes('force-ssl')) {
+    throw new Error('The "force-ssl" package is not supported. Please read the docs to configure an HTTPS redirect in your web config.');
+  }
 
   // Ensure current Meteor release is >= 1.4
   if (majorVersion > 1) {
