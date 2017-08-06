@@ -72,7 +72,7 @@ Open this file locally, and add a "meteor-azure" key with the following values:
         "envVariables": {
           "ROOT_URL": "https://<app name>.azurewebsites.net",
           "MONGO_URL": "MongoDB URL"
-        },
+        }
       }
 
       // ... keys for Meteor.settings
