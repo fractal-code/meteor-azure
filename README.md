@@ -16,6 +16,8 @@ See the [documentation](http://meteor-azure.readthedocs.io).
 
 We welcome any questions or bug reports in the GitHub [issue tracker](https://github.com/fractal-code/meteor-azure/issues).
 
+<a href="https://app.codesponsor.io/link/kTZL2jx4aPwPVjz7qufiX5rT/fractal-code/meteor-azure" rel="nofollow"><img src="https://app.codesponsor.io/embed/kTZL2jx4aPwPVjz7qufiX5rT/fractal-code/meteor-azure.svg" style="width: 888px; height: 68px;" alt="Sponsor" /></a>
+
 ### License
 
 [MIT](https://github.com/fractal-code/meteor-azure/blob/master/LICENSE.txt)
