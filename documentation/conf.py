@@ -18,8 +18,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 project = u'Meteor Azure'
 copyright = u'2017, Talos Technology Pty Ltd'
-version = u'2.0.6'
-release = u'2.0.6'
+version = u'2.0.7'
+release = u'2.0.7'
 
 # -------------------------------
 # Internationalization
