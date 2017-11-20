@@ -38,7 +38,7 @@
     "npm-watch": "^0.1.9"
   },
   "dependencies": {
-    "axios": "^0.16.1",
+    "axios": "^0.17.1",
     "azure-arm-website": "^2.0.0-preview",
     "babel-polyfill": "^6.23.0",
     "command-exists": "^1.2.2",
