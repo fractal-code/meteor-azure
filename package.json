@@ -11,7 +11,7 @@
   },
   "scripts": {
     "build": "babel source --out-dir distribution",
-    "dev": "npm-watch",
+    "dev": "npm-watch build",
     "lint": "eslint source"
   },
   "repository": {
