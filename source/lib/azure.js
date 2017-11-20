@@ -44,8 +44,13 @@ export default class AzureMethods {
   }
 
   async updateApplicationSettings() {
-    const { resourceGroup, siteName, slotName, envVariables } = this.settings;
     let newSettings;
+    const {
+      resourceGroup,
+      siteName,
+      slotName,
+      envVariables,
+    } = this.settings;
 
     winston.info('Updating Azure application settings');
 
