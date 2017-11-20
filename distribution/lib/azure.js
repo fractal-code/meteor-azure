@@ -66,41 +66,87 @@ var AzureMethods = function () {
   }
 
   _createClass(AzureMethods, [{
-    key: 'authenticate',
+    key: 'validateKuduCredentials',
     value: function () {
       var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
-        var _settings, servicePrincipal, tenantId, subscriptionId, credentials, appId, secret;
-
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
+              case 0:
+                _context.prev = 0;
+                _context.next = 3;
+                return this.kuduClient('/api/scm/info');
+
+              case 3:
+                _context.next = 11;
+                break;
+
+              case 5:
+                _context.prev = 5;
+                _context.t0 = _context['catch'](0);
+
+                if (!(_context.t0.response.status === 401)) {
+                  _context.next = 9;
+                  break;
+                }
+
+                throw new Error('Could not authenticate with Kudu (check your deployment credentials)');
+
+              case 9:
+                // Report unknown error as-is
+                _winston2.default.error(_context.t0);
+                throw new Error('Could not connect to Kudu');
+
+              case 11:
+              case 'end':
+                return _context.stop();
+            }
+          }
+        }, _callee, this, [[0, 5]]);
+      }));
+
+      function validateKuduCredentials() {
+        return _ref.apply(this, arguments);
+      }
+
+      return validateKuduCredentials;
+    }()
+  }, {
+    key: 'authenticateSdk',
+    value: function () {
+      var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+        var _settings, servicePrincipal, tenantId, subscriptionId, credentials, appId, secret;
+
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
               case 0:
                 _settings = this.settings, servicePrincipal = _settings.servicePrincipal, tenantId = _settings.tenantId, subscriptionId = _settings.subscriptionId;
                 credentials = void 0;
 
                 if (!(servicePrincipal !== undefined)) {
-                  _context.next = 10;
+                  _context2.next = 10;
                   break;
                 }
 
                 appId = servicePrincipal.appId, secret = servicePrincipal.secret;
 
                 _winston2.default.info('Authenticating with service principal');
-                _context.next = 7;
+                _context2.next = 7;
                 return _msRestAzure2.default.loginWithServicePrincipalSecret(appId, secret, tenantId);
 
               case 7:
-                credentials = _context.sent;
-                _context.next = 14;
+                credentials = _context2.sent;
+                _context2.next = 14;
                 break;
 
               case 10:
                 _winston2.default.info('Authenticating with interactive login...');
-                _context.next = 13;
+                _context2.next = 13;
                 return _msRestAzure2.default.interactiveLogin({ domain: tenantId });
 
               case 13:
-                credentials = _context.sent;
+                credentials = _context2.sent;
 
               case 14:
 
@@ -109,27 +155,27 @@ var AzureMethods = function () {
 
               case 16:
               case 'end':
-                return _context.stop();
+                return _context2.stop();
             }
           }
-        }, _callee, this);
+        }, _callee2, this);
       }));
 
-      function authenticate() {
-        return _ref.apply(this, arguments);
+      function authenticateSdk() {
+        return _ref2.apply(this, arguments);
       }
 
-      return authenticate;
+      return authenticateSdk;
     }()
   }, {
     key: 'updateApplicationSettings',
     value: function () {
-      var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+      var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
         var newSettings, _settings2, resourceGroup, siteName, slotName, envVariables, nodeVersion, npmVersion;
 
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
                 newSettings = void 0;
                 _settings2 = this.settings, resourceGroup = _settings2.resourceGroup, siteName = _settings2.siteName, slotName = _settings2.slotName, envVariables = _settings2.envVariables;
@@ -140,24 +186,24 @@ var AzureMethods = function () {
                 // Start with current settings
 
                 if (!this.isSlot) {
-                  _context2.next = 9;
+                  _context3.next = 9;
                   break;
                 }
 
-                _context2.next = 6;
+                _context3.next = 6;
                 return this.azureSdk.listApplicationSettingsSlot(resourceGroup, siteName, slotName);
 
               case 6:
-                newSettings = _context2.sent;
-                _context2.next = 12;
+                newSettings = _context3.sent;
+                _context3.next = 12;
                 break;
 
               case 9:
-                _context2.next = 11;
+                _context3.next = 11;
                 return this.azureSdk.listApplicationSettings(resourceGroup, siteName);
 
               case 11:
-                newSettings = _context2.sent;
+                newSettings = _context3.sent;
 
               case 12:
 
@@ -202,31 +248,31 @@ var AzureMethods = function () {
                 // Push new settings
 
                 if (!this.isSlot) {
-                  _context2.next = 29;
+                  _context3.next = 29;
                   break;
                 }
 
-                _context2.next = 27;
+                _context3.next = 27;
                 return this.azureSdk.updateApplicationSettingsSlot(resourceGroup, siteName, newSettings, slotName);
 
               case 27:
-                _context2.next = 31;
+                _context3.next = 31;
                 break;
 
               case 29:
-                _context2.next = 31;
+                _context3.next = 31;
                 return this.azureSdk.updateApplicationSettings(resourceGroup, siteName, newSettings);
 
               case 31:
               case 'end':
-                return _context2.stop();
+                return _context3.stop();
             }
           }
-        }, _callee2, this);
+        }, _callee3, this);
       }));
 
       function updateApplicationSettings() {
-        return _ref2.apply(this, arguments);
+        return _ref3.apply(this, arguments);
       }
 
       return updateApplicationSettings;
@@ -234,17 +280,17 @@ var AzureMethods = function () {
   }, {
     key: 'deployBundle',
     value: function () {
-      var _ref4 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(_ref3) {
-        var bundleFile = _ref3.bundleFile,
-            isDebug = _ref3.isDebug;
+      var _ref5 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(_ref4) {
+        var bundleFile = _ref4.bundleFile,
+            isDebug = _ref4.isDebug;
         var kuduDeploy, delay, progress, kuduLogs, logDetailsUrl, logDetails;
-        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context4.prev = _context4.next) {
               case 0:
                 // Upload bundle tarball
                 _winston2.default.info('Deploying bundle tarball');
-                _context3.next = 3;
+                _context4.next = 3;
                 return this.kuduClient({
                   method: 'put',
                   url: '/vfs/meteor-azure/bundle.tar.gz',
@@ -253,7 +299,7 @@ var AzureMethods = function () {
                 });
 
               case 3:
-                _context3.next = 5;
+                _context4.next = 5;
                 return this.kuduClient({
                   method: 'post',
                   url: '/deploy?isAsync=true',
@@ -264,7 +310,7 @@ var AzureMethods = function () {
                 });
 
               case 5:
-                kuduDeploy = _context3.sent;
+                kuduDeploy = _context4.sent;
 
 
                 _winston2.default.info('Running server initialisation, polling for status...');
@@ -280,75 +326,75 @@ var AzureMethods = function () {
                 progress = void 0;
 
               case 9:
-                _context3.next = 11;
+                _context4.next = 11;
                 return delay(20000);
 
               case 11:
-                _context3.prev = 11;
-                _context3.next = 14;
+                _context4.prev = 11;
+                _context4.next = 14;
                 return this.kuduClient.get(kuduDeploy.headers.location);
 
               case 14:
-                progress = _context3.sent;
-                _context3.next = 21;
+                progress = _context4.sent;
+                _context4.next = 21;
                 break;
 
               case 17:
-                _context3.prev = 17;
-                _context3.t0 = _context3['catch'](11);
+                _context4.prev = 17;
+                _context4.t0 = _context4['catch'](11);
 
-                _winston2.default.error(_context3.t0.message);
+                _winston2.default.error(_context4.t0.message);
                 throw new Error('Could not poll server status');
 
               case 21:
                 if (progress.data.complete === false) {
-                  _context3.next = 9;
+                  _context4.next = 9;
                   break;
                 }
 
               case 22:
                 if (!(isDebug === true)) {
-                  _context3.next = 39;
+                  _context4.next = 39;
                   break;
                 }
 
                 _winston2.default.debug('Retrieving Kudu deployment log...');
-                _context3.prev = 24;
-                _context3.next = 27;
+                _context4.prev = 24;
+                _context4.next = 27;
                 return this.kuduClient(`/deployments/${progress.data.id}/log`);
 
               case 27:
-                kuduLogs = _context3.sent;
+                kuduLogs = _context4.sent;
                 logDetailsUrl = kuduLogs.data.find(function (log) {
                   return log.details_url !== null;
                 }).details_url;
-                _context3.next = 31;
+                _context4.next = 31;
                 return this.kuduClient(logDetailsUrl);
 
               case 31:
-                logDetails = _context3.sent;
+                logDetails = _context4.sent;
 
                 logDetails.data.forEach(function (log) {
                   return _winston2.default.debug(log.message);
                 });
-                _context3.next = 39;
+                _context4.next = 39;
                 break;
 
               case 35:
-                _context3.prev = 35;
-                _context3.t1 = _context3['catch'](24);
+                _context4.prev = 35;
+                _context4.t1 = _context4['catch'](24);
 
-                _winston2.default.error(_context3.t1.message);
+                _winston2.default.error(_context4.t1.message);
                 throw new Error('Could not retrieve deployment log');
 
               case 39:
                 if (!(progress.data.status === 4)) {
-                  _context3.next = 43;
+                  _context4.next = 43;
                   break;
                 }
 
                 _winston2.default.info('Finished successfully');
-                _context3.next = 44;
+                _context4.next = 44;
                 break;
 
               case 43:
@@ -356,14 +402,14 @@ var AzureMethods = function () {
 
               case 44:
               case 'end':
-                return _context3.stop();
+                return _context4.stop();
             }
           }
-        }, _callee3, this, [[11, 17], [24, 35]]);
+        }, _callee4, this, [[11, 17], [24, 35]]);
       }));
 
       function deployBundle(_x) {
-        return _ref4.apply(this, arguments);
+        return _ref5.apply(this, arguments);
       }
 
       return deployBundle;

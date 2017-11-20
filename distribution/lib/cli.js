@@ -72,36 +72,40 @@ exports.default = function () {
             settingsFile = (0, _validation.validateSettings)(_commander2.default.settings);
             azureMethods = new _azure2.default(settingsFile);
             _context.next = 6;
-            return azureMethods.authenticate();
+            return azureMethods.validateKuduCredentials();
 
           case 6:
             _context.next = 8;
-            return azureMethods.updateApplicationSettings();
+            return azureMethods.authenticateSdk();
 
           case 8:
             _context.next = 10;
+            return azureMethods.updateApplicationSettings();
+
+          case 10:
+            _context.next = 12;
             return azureMethods.deployBundle({
               bundleFile: (0, _bundle2.default)({ customWebConfig: _commander2.default.webConfig }),
               isDebug: _commander2.default.debug
             });
 
-          case 10:
-            _context.next = 16;
+          case 12:
+            _context.next = 18;
             break;
 
-          case 12:
-            _context.prev = 12;
+          case 14:
+            _context.prev = 14;
             _context.t0 = _context['catch'](0);
 
             _winston2.default.error(_context.t0.message);
             process.exit(1);
 
-          case 16:
+          case 18:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, this, [[0, 12]]);
+    }, _callee, this, [[0, 14]]);
   }));
 
   function startup() {

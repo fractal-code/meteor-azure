@@ -42,7 +42,8 @@ export default async function startup() {
     validateMeteor();
     const settingsFile = validateSettings(program.settings);
     const azureMethods = new AzureMethods(settingsFile);
-    await azureMethods.authenticate();
+    await azureMethods.validateKuduCredentials();
+    await azureMethods.authenticateSdk();
     await azureMethods.updateApplicationSettings();
     await azureMethods.deployBundle({
       bundleFile: compileBundle({ customWebConfig: program.webConfig }),

@@ -26,7 +26,22 @@ export default class AzureMethods {
     });
   }
 
-  async authenticate() {
+  async validateKuduCredentials() {
+    // Make dummy request to test auth
+    try {
+      await this.kuduClient('/api/scm/info'); 
+    } catch (error) {
+      if (error.response.status === 401) {
+        // Report user-friendly 401 error
+        throw new Error('Could not authenticate with Kudu (check your deployment credentials)');        
+      }
+      // Report unknown error as-is
+      winston.error(error);
+      throw new Error('Could not connect to Kudu');
+    }
+  }
+
+  async authenticateSdk() {
     const { servicePrincipal, tenantId, subscriptionId } = this.settings;
     let credentials;
 
