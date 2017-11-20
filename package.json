@@ -51,7 +51,7 @@
     "ms-rest-azure": "^2.4.1",
     "shelljs": "^0.7.7",
     "tar": "^4.0.2",
-    "tmp": "0.0.31",
+    "tmp": "^0.0.33",
     "update-notifier": "^2.1.0",
     "winston": "^2.3.1"
   },
