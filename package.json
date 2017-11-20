@@ -46,7 +46,7 @@
     "core-js": "^2.4.0",
     "joi": "^10.6.0",
     "jsesc": "^2.5.1",
-    "jsonfile": "^3.0.0",
+    "jsonfile": "^4.0.0",
     "lodash.omit": "^4.5.0",
     "ms-rest-azure": "^2.4.1",
     "shelljs": "^0.7.7",
