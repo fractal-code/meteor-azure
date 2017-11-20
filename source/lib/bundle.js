@@ -27,6 +27,17 @@ export default function compileBundle({ customWebConfig }) {
     winston.warn('Using default web config');
   }
 
+  // Cleanup broken symlinks
+  winston.debug('checking for broken symlinks');
+  shell.find(path.join(workingDir, 'bundle')).filter((path) => {
+    // Matches symlinks that do not exist
+    if (shell.test('-L', path) && !shell.test('-e', path)) {
+      winston.debug(`deleted symlink at '${path}'`);      
+      // Delete file
+      shell.rm('-f', path);
+    }
+  });
+
   // Create tarball
   winston.debug('create tarball');
   const tarballPath = path.join(workingDir, 'bundle.tar.gz');

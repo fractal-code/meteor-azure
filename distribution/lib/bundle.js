@@ -50,6 +50,17 @@ function compileBundle(_ref) {
     _winston2.default.warn('Using default web config');
   }
 
+  // Cleanup broken symlinks
+  _winston2.default.debug('checking for broken symlinks');
+  _shelljs2.default.find(_path2.default.join(workingDir, 'bundle')).filter(function (path) {
+    // Matches symlinks that do not exist
+    if (_shelljs2.default.test('-L', path) && !_shelljs2.default.test('-e', path)) {
+      _winston2.default.debug(`deleted symlink at '${path}'`);
+      // Delete file
+      _shelljs2.default.rm('-f', path);
+    }
+  });
+
   // Create tarball
   _winston2.default.debug('create tarball');
   var tarballPath = _path2.default.join(workingDir, 'bundle.tar.gz');

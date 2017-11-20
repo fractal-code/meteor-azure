@@ -60,7 +60,7 @@ if (_commander2.default.debug === true) {
 }
 
 exports.default = function () {
-  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
     var settingsFile, azureMethods;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {

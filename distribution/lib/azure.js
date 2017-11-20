@@ -68,7 +68,7 @@ var AzureMethods = function () {
   _createClass(AzureMethods, [{
     key: 'authenticate',
     value: function () {
-      var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+      var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
         var _settings, servicePrincipal, tenantId, subscriptionId, credentials, appId, secret;
 
         return regeneratorRuntime.wrap(function _callee$(_context) {
@@ -124,15 +124,15 @@ var AzureMethods = function () {
   }, {
     key: 'updateApplicationSettings',
     value: function () {
-      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
-        var _settings2, resourceGroup, siteName, slotName, envVariables, newSettings, nodeVersion, npmVersion;
+      var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+        var newSettings, _settings2, resourceGroup, siteName, slotName, envVariables, nodeVersion, npmVersion;
 
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                _settings2 = this.settings, resourceGroup = _settings2.resourceGroup, siteName = _settings2.siteName, slotName = _settings2.slotName, envVariables = _settings2.envVariables;
                 newSettings = void 0;
+                _settings2 = this.settings, resourceGroup = _settings2.resourceGroup, siteName = _settings2.siteName, slotName = _settings2.slotName, envVariables = _settings2.envVariables;
 
 
                 _winston2.default.info('Updating Azure application settings');
@@ -234,7 +234,7 @@ var AzureMethods = function () {
   }, {
     key: 'deployBundle',
     value: function () {
-      var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(_ref3) {
+      var _ref4 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(_ref3) {
         var bundleFile = _ref3.bundleFile,
             isDebug = _ref3.isDebug;
         var kuduDeploy, delay, progress, kuduLogs, logDetailsUrl, logDetails;
