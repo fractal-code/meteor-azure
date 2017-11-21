@@ -1,7 +1,5 @@
 # Meteor Azure
 
-<a href="https://app.codesponsor.io/link/kTZL2jx4aPwPVjz7qufiX5rT/fractal-code/meteor-azure" rel="nofollow"><img src="https://app.codesponsor.io/embed/kTZL2jx4aPwPVjz7qufiX5rT/fractal-code/meteor-azure.svg" style="width: 888px; height: 68px;" alt="Sponsor" /></a>
-
 A command line tool for deploying Meteor applications on Azure App Service.
 
 ![demo](https://user-images.githubusercontent.com/9661116/27125422-883fd03c-5137-11e7-86da-e899b6d06824.gif)
