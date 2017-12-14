@@ -1818,9 +1818,11 @@ isarray@1.0.0, isarray@^1.0.0, isarray@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/isarray/-/isarray-1.0.0.tgz#bb935d48582cba168c06834957a54a3e07124f11"
 
-isemail@2.x.x:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/isemail/-/isemail-2.2.1.tgz#0353d3d9a62951080c262c2aa0a42b8ea8e9e2a6"
+isemail@3.x.x:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/isemail/-/isemail-3.0.0.tgz#c89a46bb7a3361e1759f8028f9082488ecce3dff"
+  dependencies:
+    punycode "2.x.x"
 
 isexe@^2.0.0:
   version "2.0.0"
@@ -1836,17 +1838,12 @@ isstream@0.1.x, isstream@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
 
-items@2.x.x:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/items/-/items-2.1.1.tgz#8bd16d9c83b19529de5aea321acaada78364a198"
-
-joi@^10.6.0:
-  version "10.6.0"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-10.6.0.tgz#52587f02d52b8b75cdb0c74f0b164a191a0e1fc2"
+joi@^12.0.0:
+  version "12.0.0"
+  resolved "https://registry.yarnpkg.com/joi/-/joi-12.0.0.tgz#46f55e68f4d9628f01bbb695902c8b307ad8d33a"
   dependencies:
     hoek "4.x.x"
-    isemail "2.x.x"
-    items "2.x.x"
+    isemail "3.x.x"
     topo "2.x.x"
 
 js-tokens@^3.0.0, js-tokens@^3.0.2:
@@ -2029,6 +2026,10 @@ lodash.defaults@^3.1.2:
     lodash.assign "^3.0.0"
     lodash.restparam "^3.0.0"
 
+lodash.dropright@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/lodash.dropright/-/lodash.dropright-4.1.1.tgz#5410858b624ae531562b18205cc3fbe70544802c"
+
 lodash.isarguments@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/lodash.isarguments/-/lodash.isarguments-3.1.0.tgz#2f573d85c6a24289ff00663b491c1d338ff3458a"
@@ -2044,6 +2045,10 @@ lodash.keys@^3.0.0:
     lodash._getnative "^3.0.0"
     lodash.isarguments "^3.0.0"
     lodash.isarray "^3.0.0"
+
+lodash.nth@^4.11.2:
+  version "4.11.2"
+  resolved "https://registry.yarnpkg.com/lodash.nth/-/lodash.nth-4.11.2.tgz#16ae87a38cdae2092cb48655f7eb0fc878930f33"
 
 lodash.omit@^4.5.0:
   version "4.5.0"
@@ -2487,6 +2492,10 @@ ps-tree@^1.1.0:
 pseudomap@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/pseudomap/-/pseudomap-1.0.2.tgz#f052a28da70e618917ef0a8ac34c1ae5a68286b3"
+
+punycode@2.x.x:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.0.tgz#5f863edc89b96db09074bad7947bf09056ca4e7d"
 
 punycode@^1.4.1:
   version "1.4.1"

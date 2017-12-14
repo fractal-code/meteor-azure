@@ -9,8 +9,10 @@ import { validateSettings, validateMeteor } from './validation';
 import compileBundle from './bundle';
 import AzureMethods from './azure';
 
+// Notify user of available updates
 updateNotifier({ pkg }).notify();
 
+// Configure CLI
 program
   .description(pkg.description)
   .version(`v${pkg.version}`, '-v, --version')
@@ -23,32 +25,38 @@ program
 // Pretty print logs
 winston.cli();
 
-// Terminate on shell error
+// Terminate on shelljs errors
 shell.config.fatal = true;
 
-// Quiet mode
+// Toggle Quiet mode based on user preference
 if (program.quiet === true) {
   winston.level = 'error';
   shell.config.silent = true;
 }
 
-// Debug mode
+// Toggle Debug mode based on user preference
 if (program.debug === true) {
   winston.level = 'debug';
 }
 
 export default async function startup() {
   try {
+    // Prechecks
     validateMeteor();
     const settingsFile = validateSettings(program.settings);
+
+    // Configure Azure settings
     const azureMethods = new AzureMethods(settingsFile);
     await azureMethods.validateKuduCredentials();
-    await azureMethods.authenticateSdk();
+    await azureMethods.authenticateWithSdk();
     await azureMethods.updateApplicationSettings();
-    await azureMethods.deployBundle({
-      bundleFile: compileBundle({ customWebConfig: program.webConfig }),
-      isDebug: program.debug,
-    });
+
+    // Deploy Meteor bundle
+    const bundleFile = compileBundle({ customWebConfig: program.webConfig });
+    await azureMethods.deployBundle({ bundleFile });
+
+    // Track server initialisation
+    await azureMethods.serverInitialisation({ isDebug: program.debug });
   } catch (error) {
     winston.error(error.message);
     process.exit(1);

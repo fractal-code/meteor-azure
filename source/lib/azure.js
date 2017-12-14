@@ -12,172 +12,230 @@ import winston from 'winston';
 export default class AzureMethods {
   constructor(settingsFile) {
     this.meteorSettings = omit(settingsFile, 'meteor-azure');
-    this.settings = settingsFile['meteor-azure'];
-    this.isSlot = (this.settings.slotName !== undefined);
 
-    // Determine Kudu site name
-    let kuduName = this.settings.siteName;
-    if (this.isSlot) { kuduName = `${kuduName}-${this.settings.slotName}`; }
+    // Ensure settings for single-site (object) and multi-site (array of objects) are interoperable
+    this.sites = settingsFile['meteor-azure'];
+    if (!Array.isArray(this.sites)) { this.sites = [this.sites]; }
 
-    // Configure Kudu API connection
-    this.kuduClient = axios.create({
-      baseURL: `https://${kuduName}.scm.azurewebsites.net`,
-      auth: this.settings.deploymentCreds,
+    // Initialise each site
+    this.sites.map((site) => {
+      const currentSite = site;
+
+      currentSite.isSlot = (currentSite.slotName !== undefined);
+
+      // Determine unique name, must identify multiple slots from same site
+      currentSite.uniqueName = currentSite.siteName;
+      if (currentSite.isSlot) { currentSite.uniqueName = `${currentSite.uniqueName}-${currentSite.slotName}`; }
+
+      // Configure Kudu API connection
+      winston.debug(`${currentSite.uniqueName}: configure kudu api`);
+      currentSite.kuduClient = axios.create({
+        baseURL: `https://${currentSite.uniqueName}.scm.azurewebsites.net`,
+        auth: currentSite.deploymentCreds,
+      });
+
+      return currentSite;
     });
+  }
+
+  // Helper for async iteration over sites, returns a single promise (i.e awaitable)
+  static async forEachSite(sites, siteMethod) {
+    // Execute provided method on each site concurrently
+    await Promise.all(sites.map(async (site) => {
+      try {
+        await siteMethod(site);
+      } catch (error) {
+        // Attach relevant site context to error
+        throw new Error(`${site.uniqueName}: ${error.message}`);
+      }
+    }));
   }
 
   async validateKuduCredentials() {
-    // Make dummy request to test auth
-    try {
-      await this.kuduClient('/api/scm/info'); 
-    } catch (error) {
-      if (error.response.status === 401) {
+    winston.info('Validating Kudu connection');
+    await AzureMethods.forEachSite(this.sites, async (site) => {
+      try {
+        // Make dummy request to test Kudu auth
+        await site.kuduClient('/api/scm/info');
+      } catch (error) {
         // Report user-friendly 401 error
-        throw new Error('Could not authenticate with Kudu (check your deployment credentials)');        
+        if (error.response && error.response.status === 401) {
+          winston.debug(error);
+          throw new Error('Could not authenticate with Kudu (check deployment credentials)');
+        }
+        // Report unknown error as-is
+        winston.error(error);
+        throw new Error('Could not connect to Kudu');
       }
-      // Report unknown error as-is
-      winston.error(error);
-      throw new Error('Could not connect to Kudu');
-    }
+    });
   }
 
-  async authenticateSdk() {
-    const { servicePrincipal, tenantId, subscriptionId } = this.settings;
-    let credentials;
+  async authenticateWithSdk() {
+    await AzureMethods.forEachSite(this.sites, async (site) => {
+      const currentSite = site;
+      const { servicePrincipal, tenantId, subscriptionId } = currentSite;
+      let credentials;
 
-    if (servicePrincipal !== undefined) {
-      const { appId, secret } = servicePrincipal;
-      winston.info('Authenticating with service principal');
-      credentials = await msRest.loginWithServicePrincipalSecret(appId, secret, tenantId);
-    } else {
-      winston.info('Authenticating with interactive login...');
-      credentials = await msRest.interactiveLogin({ domain: tenantId });
-    }
+      /* Retrieve credential from MS API, uses service principal when available
+       or otherwise requests an interactive login */
+      if (servicePrincipal !== undefined) {
+        const { appId, secret } = servicePrincipal;
+        winston.info(`${currentSite.uniqueName}: Authenticating with service principal`);
+        credentials = await msRest.loginWithServicePrincipalSecret(appId, secret, tenantId);
+      } else {
+        winston.info(`${currentSite.uniqueName}: Authenticating with interactive login...`);
+        credentials = await msRest.interactiveLogin({ domain: tenantId });
+      }
 
-    winston.debug('completed Azure authentication');
-    this.azureSdk = new AzureSdk(credentials, subscriptionId).webApps;
+      // Initialise Azure SDK using MS credential
+      winston.debug(`${currentSite.uniqueName}: completed Azure authentication`);
+      currentSite.azureSdk = new AzureSdk(credentials, subscriptionId).webApps;
+    });
   }
 
   async updateApplicationSettings() {
-    let newSettings;
-    const {
-      resourceGroup,
-      siteName,
-      slotName,
-      envVariables,
-    } = this.settings;
+    const { meteorSettings, sites } = this;
 
-    winston.info('Updating Azure application settings');
+    await AzureMethods.forEachSite(sites, async (site) => {
+      let newSettings;
 
-    // Start with current settings
-    if (this.isSlot) {
-      newSettings = await this.azureSdk
-        .listApplicationSettingsSlot(resourceGroup, siteName, slotName);
-    } else {
-      newSettings = await this.azureSdk.listApplicationSettings(resourceGroup, siteName);
-    }
+      // Unnest site details for better code readability
+      const {
+        resourceGroup, envVariables, siteName, slotName, uniqueName, azureSdk, isSlot,
+      } = site;
 
-    // Set environment variables
-    winston.debug('set environment variables');
-    Object.assign(newSettings.properties, envVariables);
+      winston.info(`${uniqueName}: Updating Azure application settings`);
 
-    // Set Meteor settings
-    winston.debug('set Meteor settings');
-    Object.assign(newSettings.properties, {
-      METEOR_SETTINGS: this.meteorSettings,
-      METEOR_SKIP_NPM_REBUILD: 1,
-    });
+      // Retrieve current settings from Azure to serve as a starting point
+      winston.debug(`${uniqueName}: retrieve existing values`);
+      if (isSlot) {
+        newSettings = await azureSdk.listApplicationSettingsSlot(resourceGroup, siteName, slotName);
+      } else {
+        newSettings = await azureSdk.listApplicationSettings(resourceGroup, siteName);
+      }
 
-    // Set Kudu deployment settings
-    winston.debug('set Kudu deployment settings');
-    Object.assign(newSettings.properties, {
-      METEOR_AZURE_TIMESTAMP: Date.now(), // abort incomplete deploy
-      SCM_COMMAND_IDLE_TIMEOUT: 3600,
-      SCM_TOUCH_WEBCONFIG_AFTER_DEPLOYMENT: 0,
-    });
+      // Set environment variables (from settings file)
+      winston.debug(`${uniqueName}: set environment variables`);
+      Object.assign(newSettings.properties, envVariables);
 
-    // Set Node/NPM versions (based on current Meteor)
-    const nodeVersion = shell.exec('meteor node -v', { silent: true }).stdout.trim();
-    const npmVersion = shell.exec('meteor npm -v', { silent: true }).stdout.trim();
-    winston.debug(`set Node to ${nodeVersion}`);
-    winston.debug(`set NPM to v${npmVersion}`);
-    Object.assign(newSettings.properties, {
-      METEOR_AZURE_NODE_VERSION: nodeVersion,
-      METEOR_AZURE_NPM_VERSION: npmVersion,
-    });
-
-    // Serialise values
-    Object.keys(newSettings.properties).forEach((key) => {
-      newSettings.properties[key] = jsesc(newSettings.properties[key], {
-        json: true,
-        wrap: false,
+      // Set Meteor settings (from settings file)
+      winston.debug(`${uniqueName}: set Meteor settings`);
+      Object.assign(newSettings.properties, {
+        METEOR_SETTINGS: meteorSettings,
+        METEOR_SKIP_NPM_REBUILD: 1,
       });
-    });
 
-    // Push new settings
-    if (this.isSlot) {
-      await this.azureSdk
-        .updateApplicationSettingsSlot(resourceGroup, siteName, newSettings, slotName);
-    } else {
-      await this.azureSdk.updateApplicationSettings(resourceGroup, siteName, newSettings);
-    }
+      // Set Kudu deployment settings
+      winston.debug(`${uniqueName}: set Kudu deployment settings`);
+      Object.assign(newSettings.properties, {
+        METEOR_AZURE_TIMESTAMP: Date.now(), // abort incomplete deploy
+        SCM_COMMAND_IDLE_TIMEOUT: 3600,
+        SCM_TOUCH_WEBCONFIG_AFTER_DEPLOYMENT: 0,
+      });
+
+      // Set Node/NPM versions (based on current Meteor)
+      const nodeVersion = shell.exec('meteor node -v', { silent: true }).stdout.trim();
+      const npmVersion = shell.exec('meteor npm -v', { silent: true }).stdout.trim();
+      winston.debug(`${uniqueName}: set Node to ${nodeVersion}`);
+      winston.debug(`${uniqueName}: set NPM to v${npmVersion}`);
+      Object.assign(newSettings.properties, {
+        METEOR_AZURE_NODE_VERSION: nodeVersion,
+        METEOR_AZURE_NPM_VERSION: npmVersion,
+      });
+
+      // Serialise values to ensure consistency/compliance of formating
+      winston.debug(`${uniqueName}: serialise values`);
+      Object.keys(newSettings.properties).forEach((key) => {
+        newSettings.properties[key] = jsesc(newSettings.properties[key], {
+          json: true,
+          wrap: false,
+        });
+      });
+
+      // Push new settings to Azure
+      winston.debug(`${uniqueName}: push new settings`);
+      if (isSlot) {
+        await azureSdk
+          .updateApplicationSettingsSlot(resourceGroup, siteName, newSettings, slotName);
+      } else {
+        await azureSdk.updateApplicationSettings(resourceGroup, siteName, newSettings);
+      }
+    });
   }
 
-  async deployBundle({ bundleFile, isDebug }) {
-    // Upload bundle tarball
-    winston.info('Deploying bundle tarball');
-    await this.kuduClient({
-      method: 'put',
-      url: '/vfs/meteor-azure/bundle.tar.gz',
-      headers: { 'If-Match': '*' },
-      data: fs.createReadStream(bundleFile),
+  async deployBundle({ bundleFile }) {
+    await AzureMethods.forEachSite(this.sites, async (site) => {
+      // Upload bundle tarball
+      winston.info(`${site.uniqueName}: Deploying bundle tarball`);
+      await site.kuduClient({
+        method: 'put',
+        url: '/vfs/meteor-azure/bundle.tar.gz',
+        headers: { 'If-Match': '*' },
+        data: fs.createReadStream(bundleFile),
+      });
     });
+  }
 
-    // Run server initialisation
-    const kuduDeploy = await this.kuduClient({
-      method: 'post',
-      url: '/deploy?isAsync=true',
-      data: {
-        format: 'basic',
-        url: 'https://github.com/fractal-code/meteor-azure-server-init.git',
-      },
+  async serverInitialisation({ isDebug }) {
+    const { sites } = this;
+
+    await AzureMethods.forEachSite(sites, async (site) => {
+      // Manually trigger Kudu deploy, fetches our internal repo (contains custom deploy script)
+      winston.info(`${site.uniqueName}: Running server initialisation`);
+      const kuduDeploy = await site.kuduClient({
+        method: 'post',
+        url: '/deploy?isAsync=true',
+        data: {
+          format: 'basic',
+          url: 'https://github.com/fractal-code/meteor-azure-server-init.git',
+        },
+      });
+
+      // Poll Kudu log entries to track live status
+      winston.info(`${site.uniqueName}: Polling server status...`);
+      const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+      let progress;
+      do {
+        try {
+          progress = await site.kuduClient.get(kuduDeploy.headers.location);
+          // 10 second interval
+          await delay(10000);
+        } catch (error) {
+          /* Report polling error while ensuring users understand this doesn't indicate
+           a failed deployment. Provide instructions to continue tracking status
+           manually using Kudu interface */
+          winston.debug(error.message);
+          const logId = progress.data.id;
+          const logUrls = sites.map(logSite => `${logSite.uniqueName}: https://${logSite.uniqueName}.scm.azurewebsites.net/api/vfs/site/deployments/${logId}/log.log`);
+          throw new Error(`Could not poll server status.
+          This is most likely due to an issue with your internet connection and does NOT indicate
+          a deployment failure. You may choose to try again, or continue tracking the active deploy
+          by opening these log URLs in your browser (may require multiple checks before getting
+          a final result):\n${logUrls.join('\n')}\n`);
+        }
+      } while (progress.data.complete === false);
+
+
+      // Provide full Kudu deployment log in debug mode
+      if (isDebug === true) {
+        winston.debug(`${site.uniqueName}: Retrieving Kudu deployment log...`);
+        try {
+          const kuduLogs = await site.kuduClient(`/deployments/${progress.data.id}/log`);
+          const logDetailsUrl = kuduLogs.data.find(log => log.details_url !== null).details_url;
+          const logDetails = await site.kuduClient(logDetailsUrl);
+          logDetails.data.forEach(log => winston.debug(log.message));
+        } catch (error) {
+          winston.error(error.message);
+          throw new Error('Could not retrieve deployment log');
+        }
+      }
+
+      // Report final deploy status
+      if (progress.data.status === 4) {
+        winston.info(`${site.uniqueName}: Finished successfully`);
+      } else {
+        throw new Error('Failed to complete server initialisation');
+      }
     });
-
-    winston.info('Running server initialisation, polling for status...');
-
-    // Poll server for deploy status
-    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-    let progress;
-    do {
-      await delay(20000); // 20 second interval
-      try {
-        progress = await this.kuduClient.get(kuduDeploy.headers.location);
-      } catch (error) {
-        winston.error(error.message);
-        throw new Error('Could not poll server status');
-      }
-    } while (progress.data.complete === false);
-
-
-    // Retrieve Kudu deployment log for debug mode
-    if (isDebug === true) {
-      winston.debug('Retrieving Kudu deployment log...');
-      try {
-        const kuduLogs = await this.kuduClient(`/deployments/${progress.data.id}/log`);
-        const logDetailsUrl = kuduLogs.data.find(log => log.details_url !== null).details_url;
-        const logDetails = await this.kuduClient(logDetailsUrl);
-        logDetails.data.forEach(log => winston.debug(log.message));
-      } catch (error) {
-        winston.error(error.message);
-        throw new Error('Could not retrieve deployment log');
-      }
-    }
-
-    // Report deploy status
-    if (progress.data.status === 4) {
-      winston.info('Finished successfully');
-    } else {
-      throw new Error('Failed to complete server initialisation');
-    }
   }
 }
