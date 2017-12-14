@@ -29,12 +29,12 @@ export default function compileBundle({ customWebConfig }) {
 
   // Cleanup broken symlinks
   winston.debug('checking for broken symlinks');
-  shell.find(path.join(workingDir, 'bundle')).filter((path) => {
+  shell.find(path.join(workingDir, 'bundle')).forEach((symlinkPath) => {
     // Matches symlinks that do not exist
-    if (shell.test('-L', path) && !shell.test('-e', path)) {
-      winston.debug(`deleted symlink at '${path}'`);      
+    if (shell.test('-L', symlinkPath) && !shell.test('-e', symlinkPath)) {
       // Delete file
-      shell.rm('-f', path);
+      shell.rm('-f', symlinkPath);
+      winston.debug(`deleted symlink at '${symlinkPath}'`);
     }
   });
 
