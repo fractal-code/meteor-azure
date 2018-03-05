@@ -398,7 +398,8 @@ var AzureMethods = function () {
                               method: 'put',
                               url: '/vfs/meteor-azure/bundle.tar.gz',
                               headers: { 'If-Match': '*' },
-                              data: _fs2.default.createReadStream(bundleFile)
+                              data: _fs2.default.createReadStream(bundleFile),
+                              maxContentLength: -1
                             });
 
                           case 3:
