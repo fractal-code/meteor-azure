@@ -172,7 +172,7 @@ export default class AzureMethods {
         url: '/vfs/meteor-azure/bundle.tar.gz',
         headers: { 'If-Match': '*' },
         data: fs.createReadStream(bundleFile),
-        maxContentLength: -1,
+        maxContentLength: Infinity,
       });
     });
   }
