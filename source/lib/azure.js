@@ -3,6 +3,7 @@
 import AzureSdk from 'azure-arm-website';
 import msRest from 'ms-rest-azure';
 import omit from 'lodash.omit';
+import defaultTo from 'lodash.defaultto';
 import axios from 'axios';
 import shell from 'shelljs';
 import jsesc from 'jsesc';
@@ -181,14 +182,18 @@ export default class AzureMethods {
     const { sites } = this;
 
     await AzureMethods.forEachSite(sites, async (site) => {
-      // Manually trigger Kudu deploy, fetches our internal repo (contains custom deploy script)
+      // Manually trigger Kudu deploy with custom deploy script
       winston.info(`${site.uniqueName}: Running server initialisation`);
       const kuduDeploy = await site.kuduClient({
         method: 'post',
         url: '/deploy?isAsync=true',
         data: {
           format: 'basic',
-          url: 'https://github.com/fractal-code/meteor-azure-server-init.git',
+          // Fetch script from provided url or fallback to our internal repo
+          url: defaultTo(
+            site.customServerInitRepo,
+            'https://github.com/fractal-code/meteor-azure-server-init.git',
+          ),
         },
       });
 

@@ -18,6 +18,10 @@ var _lodash = require('lodash.omit');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _lodash3 = require('lodash.defaultto');
+
+var _lodash4 = _interopRequireDefault(_lodash3);
+
 var _axios = require('axios');
 
 var _axios2 = _interopRequireDefault(_axios);
@@ -450,7 +454,7 @@ var AzureMethods = function () {
                       while (1) {
                         switch (_context9.prev = _context9.next) {
                           case 0:
-                            // Manually trigger Kudu deploy, fetches our internal repo (contains custom deploy script)
+                            // Manually trigger Kudu deploy with custom deploy script
                             _winston2.default.info(`${site.uniqueName}: Running server initialisation`);
                             _context9.next = 3;
                             return site.kuduClient({
@@ -458,7 +462,8 @@ var AzureMethods = function () {
                               url: '/deploy?isAsync=true',
                               data: {
                                 format: 'basic',
-                                url: 'https://github.com/fractal-code/meteor-azure-server-init.git'
+                                // Fetch script from provided url or fallback to our internal repo
+                                url: (0, _lodash4.default)(site.customServerInitRepo, 'https://github.com/fractal-code/meteor-azure-server-init.git')
                               }
                             });
 
