@@ -93,7 +93,7 @@ export default class AzureMethods {
     });
   }
 
-  async updateApplicationSettings() {
+  async updateApplicationSettings(architecture) {
     const { meteorSettings, sites } = this;
 
     await AzureMethods.forEachSite(sites, async (site) => {
@@ -131,6 +131,12 @@ export default class AzureMethods {
         METEOR_AZURE_TIMESTAMP: Date.now(), // abort incomplete deploy
         SCM_COMMAND_IDLE_TIMEOUT: 3600,
         SCM_TOUCH_WEBCONFIG_AFTER_DEPLOYMENT: 0,
+      });
+
+      // Set specified Node architecture
+      winston.debug(`${uniqueName}: set Node architecture to ${architecture}-bit`);
+      Object.assign(newSettings.properties, {
+        METEOR_AZURE_NODE_ARCH: architecture,
       });
 
       // Set Node/NPM versions (based on current Meteor)

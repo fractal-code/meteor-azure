@@ -19,6 +19,7 @@ program
   .version(`v${pkg.version}`, '-v, --version')
   .option('-s, --settings <paths>', 'path to settings file or comma-separated list of paths [settings.json]', 'settings.json')
   .option('-w, --web-config <path>', 'path to custom web.config file')
+  .option('-a, --architecture <32|64>', 'target node architecture [32]', '32')
   .option('-d, --debug', 'enable debug mode')
   .option('-q, --quiet', 'enable quite mode')
   .parse(process.argv);
@@ -42,8 +43,14 @@ if (program.debug === true) {
 
 export default async function startup() {
   try {
-    // Validate Meteor
-    validateMeteor(program);
+    // Validate specified architecture
+    if (program.architecture !== '32' && program.architecture !== '64') {
+      throw new Error('Invalid architecture specified - must be \'32\' or \'64\'');
+    }
+    winston.info(`Targetting ${program.architecture}-bit Node architecture`);
+
+    // Validate Meteor version/packages
+    validateMeteor(program.architecture);
 
     // Validate settings file(s)
     const settingsFilePaths = program.settings.split(',');
@@ -56,12 +63,15 @@ export default async function startup() {
       winston.info(`Validating Kudu connection (${settingsFilePaths[index]})`);
       await azureMethods.validateKuduCredentials();
       await azureMethods.authenticateWithSdk();
-      await azureMethods.updateApplicationSettings();
+      await azureMethods.updateApplicationSettings(program.architecture);
       azureMethodsInstances.push(azureMethods);
     });
 
     // Deploy Meteor bundle
-    const bundleFile = compileBundle({ customWebConfig: program.webConfig });
+    const bundleFile = compileBundle({
+      customWebConfig: program.webConfig,
+      architecture: program.architecture,
+    });
     await forEachParallel(azureMethodsInstances, async (azureMethods) => {
       await azureMethods.deployBundle({ bundleFile });
     });

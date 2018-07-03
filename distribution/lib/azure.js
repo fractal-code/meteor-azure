@@ -240,7 +240,7 @@ var AzureMethods = function () {
   }, {
     key: 'updateApplicationSettings',
     value: function () {
-      var _ref5 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
+      var _ref5 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6(architecture) {
         var _this3 = this;
 
         var meteorSettings, sites;
@@ -310,6 +310,12 @@ var AzureMethods = function () {
                               SCM_TOUCH_WEBCONFIG_AFTER_DEPLOYMENT: 0
                             });
 
+                            // Set specified Node architecture
+                            _winston2.default.debug(`${uniqueName}: set Node architecture to ${architecture}-bit`);
+                            Object.assign(newSettings.properties, {
+                              METEOR_AZURE_NODE_ARCH: architecture
+                            });
+
                             // Set Node/NPM versions (based on current Meteor)
                             nodeVersion = _shelljs2.default.exec('meteor node -v', { silent: true }).stdout.trim();
                             npmVersion = _shelljs2.default.exec('meteor npm -v', { silent: true }).stdout.trim();
@@ -334,22 +340,22 @@ var AzureMethods = function () {
                             _winston2.default.debug(`${uniqueName}: push new settings`);
 
                             if (!isSlot) {
-                              _context5.next = 32;
+                              _context5.next = 34;
                               break;
                             }
 
-                            _context5.next = 30;
+                            _context5.next = 32;
                             return azureSdk.updateApplicationSettingsSlot(resourceGroup, siteName, newSettings, slotName);
 
-                          case 30:
-                            _context5.next = 34;
+                          case 32:
+                            _context5.next = 36;
                             break;
 
-                          case 32:
-                            _context5.next = 34;
+                          case 34:
+                            _context5.next = 36;
                             return azureSdk.updateApplicationSettings(resourceGroup, siteName, newSettings);
 
-                          case 34:
+                          case 36:
                           case 'end':
                             return _context5.stop();
                         }
@@ -357,7 +363,7 @@ var AzureMethods = function () {
                     }, _callee5, _this3);
                   }));
 
-                  return function (_x3) {
+                  return function (_x4) {
                     return _ref6.apply(this, arguments);
                   };
                 }());
@@ -370,7 +376,7 @@ var AzureMethods = function () {
         }, _callee6, this);
       }));
 
-      function updateApplicationSettings() {
+      function updateApplicationSettings(_x3) {
         return _ref5.apply(this, arguments);
       }
 
@@ -413,7 +419,7 @@ var AzureMethods = function () {
                     }, _callee7, _this4);
                   }));
 
-                  return function (_x5) {
+                  return function (_x6) {
                     return _ref9.apply(this, arguments);
                   };
                 }());
@@ -426,7 +432,7 @@ var AzureMethods = function () {
         }, _callee8, this);
       }));
 
-      function deployBundle(_x4) {
+      function deployBundle(_x5) {
         return _ref8.apply(this, arguments);
       }
 
@@ -577,7 +583,7 @@ var AzureMethods = function () {
                     }, _callee9, _this5, [[7, 15], [21, 32]]);
                   }));
 
-                  return function (_x7) {
+                  return function (_x8) {
                     return _ref12.apply(this, arguments);
                   };
                 }());
@@ -590,7 +596,7 @@ var AzureMethods = function () {
         }, _callee10, this);
       }));
 
-      function serverInitialisation(_x6) {
+      function serverInitialisation(_x7) {
         return _ref11.apply(this, arguments);
       }
 
@@ -634,7 +640,7 @@ var AzureMethods = function () {
                     }, _callee11, _this6, [[0, 5]]);
                   }));
 
-                  return function (_x10) {
+                  return function (_x11) {
                     return _ref14.apply(this, arguments);
                   };
                 }()));
@@ -647,7 +653,7 @@ var AzureMethods = function () {
         }, _callee12, this);
       }));
 
-      function forEachSite(_x8, _x9) {
+      function forEachSite(_x9, _x10) {
         return _ref13.apply(this, arguments);
       }
 

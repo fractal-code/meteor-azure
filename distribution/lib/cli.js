@@ -44,7 +44,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 (0, _updateNotifier2.default)({ pkg: _package2.default }).notify();
 
 // Configure CLI
-_commander2.default.description(_package2.default.description).version(`v${_package2.default.version}`, '-v, --version').option('-s, --settings <paths>', 'path to settings file or comma-separated list of paths [settings.json]', 'settings.json').option('-w, --web-config <path>', 'path to custom web.config file').option('-d, --debug', 'enable debug mode').option('-q, --quiet', 'enable quite mode').parse(process.argv);
+_commander2.default.description(_package2.default.description).version(`v${_package2.default.version}`, '-v, --version').option('-s, --settings <paths>', 'path to settings file or comma-separated list of paths [settings.json]', 'settings.json').option('-w, --web-config <path>', 'path to custom web.config file').option('-a, --architecture <32|64>', 'target node architecture [32]', '32').option('-d, --debug', 'enable debug mode').option('-q, --quiet', 'enable quite mode').parse(process.argv);
 
 // Pretty print logs
 _winston2.default.cli();
@@ -74,8 +74,18 @@ exports.default = function () {
           case 0:
             _context4.prev = 0;
 
-            // Validate Meteor
-            (0, _validation.validateMeteor)(_commander2.default);
+            if (!(_commander2.default.architecture !== '32' && _commander2.default.architecture !== '64')) {
+              _context4.next = 3;
+              break;
+            }
+
+            throw new Error('Invalid architecture specified - must be \'32\' or \'64\'');
+
+          case 3:
+            _winston2.default.info(`Targetting ${_commander2.default.architecture}-bit Node architecture`);
+
+            // Validate Meteor version/packages
+            (0, _validation.validateMeteor)(_commander2.default.architecture);
 
             // Validate settings file(s)
             settingsFilePaths = _commander2.default.settings.split(',');
@@ -86,7 +96,7 @@ exports.default = function () {
             // Configure Azure settings
 
             azureMethodsInstances = [];
-            _context4.next = 7;
+            _context4.next = 10;
             return (0, _pIteration.forEach)(settingsFiles, function () {
               var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(settingsFile, index) {
                 var azureMethods;
@@ -106,7 +116,7 @@ exports.default = function () {
 
                       case 6:
                         _context.next = 8;
-                        return azureMethods.updateApplicationSettings();
+                        return azureMethods.updateApplicationSettings(_commander2.default.architecture);
 
                       case 8:
                         azureMethodsInstances.push(azureMethods);
@@ -124,11 +134,14 @@ exports.default = function () {
               };
             }());
 
-          case 7:
+          case 10:
 
             // Deploy Meteor bundle
-            bundleFile = (0, _bundle2.default)({ customWebConfig: _commander2.default.webConfig });
-            _context4.next = 10;
+            bundleFile = (0, _bundle2.default)({
+              customWebConfig: _commander2.default.webConfig,
+              architecture: _commander2.default.architecture
+            });
+            _context4.next = 13;
             return (0, _pIteration.forEach)(azureMethodsInstances, function () {
               var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(azureMethods) {
                 return regeneratorRuntime.wrap(function _callee2$(_context2) {
@@ -151,8 +164,8 @@ exports.default = function () {
               };
             }());
 
-          case 10:
-            _context4.next = 12;
+          case 13:
+            _context4.next = 15;
             return (0, _pIteration.forEach)(azureMethodsInstances, function () {
               var _ref4 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(azureMethods) {
                 return regeneratorRuntime.wrap(function _callee3$(_context3) {
@@ -187,23 +200,23 @@ exports.default = function () {
               };
             }());
 
-          case 12:
-            _context4.next = 18;
+          case 15:
+            _context4.next = 21;
             break;
 
-          case 14:
-            _context4.prev = 14;
+          case 17:
+            _context4.prev = 17;
             _context4.t0 = _context4['catch'](0);
 
             _winston2.default.error(_context4.t0.message);
             process.exit(1);
 
-          case 18:
+          case 21:
           case 'end':
             return _context4.stop();
         }
       }
-    }, _callee4, this, [[0, 14]]);
+    }, _callee4, this, [[0, 17]]);
   }));
 
   function startup() {

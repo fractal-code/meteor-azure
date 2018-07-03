@@ -8,7 +8,7 @@ import dropRight from 'lodash.dropright';
 import Joi from 'joi';
 import commandExists from 'command-exists';
 
-export function validateMeteor() {
+export function validateMeteor(architecture) {
   let release;
   let packages;
 
@@ -41,9 +41,17 @@ export function validateMeteor() {
 
   // Ensure current Meteor release is >= 1.4
   winston.debug('check current Meteor release >= 1.4');
-  if (majorVersion > 1) { return; }
-  if (majorVersion === 1 && minorVersion >= 4) { return; }
-  throw new Error('Meteor version must be >= 1.4');
+  if (majorVersion < 1 || minorVersion < 4) {
+    throw new Error('Meteor version must be >= 1.4');
+  }
+
+  // Ensure current Meteor release >= 1.6 for 64-bit architecture
+  if (architecture === '64') {
+    winston.debug('check current Meteor release >= 1.6 for 64-bit Node');
+    if (majorVersion < 1 || minorVersion < 6) {
+      throw new Error('Meteor version must be >= 1.6 for 64-bit Node');
+    }
+  }
 }
 
 export function validateSettings(filePath) {

@@ -28,7 +28,8 @@ var _winston2 = _interopRequireDefault(_winston);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function compileBundle(_ref) {
-  var customWebConfig = _ref.customWebConfig;
+  var customWebConfig = _ref.customWebConfig,
+      architecture = _ref.architecture;
 
   var workingDir = _tmp2.default.dirSync().name;
 
@@ -36,7 +37,7 @@ function compileBundle(_ref) {
 
   // Generate Meteor build
   _winston2.default.debug('generate meteor build');
-  _shelljs2.default.exec(`meteor build ${workingDir} --directory --server-only --architecture os.windows.x86_32`);
+  _shelljs2.default.exec(`meteor build ${workingDir} --directory --server-only --architecture os.windows.x86_${architecture}`);
 
   // Add custom web config
   if (customWebConfig !== undefined) {

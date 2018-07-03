@@ -6,14 +6,14 @@ import shell from 'shelljs';
 import tar from 'tar';
 import winston from 'winston';
 
-export default function compileBundle({ customWebConfig }) {
+export default function compileBundle({ customWebConfig, architecture }) {
   const workingDir = tmp.dirSync().name;
 
   winston.info('Compiling application bundle');
 
   // Generate Meteor build
   winston.debug('generate meteor build');
-  shell.exec(`meteor build ${workingDir} --directory --server-only --architecture os.windows.x86_32`);
+  shell.exec(`meteor build ${workingDir} --directory --server-only --architecture os.windows.x86_${architecture}`);
 
   // Add custom web config
   if (customWebConfig !== undefined) {

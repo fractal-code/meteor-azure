@@ -36,7 +36,7 @@ var _commandExists2 = _interopRequireDefault(_commandExists);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function validateMeteor() {
+function validateMeteor(architecture) {
   var release = void 0;
   var packages = void 0;
 
@@ -69,13 +69,17 @@ function validateMeteor() {
 
   // Ensure current Meteor release is >= 1.4
   _winston2.default.debug('check current Meteor release >= 1.4');
-  if (majorVersion > 1) {
-    return;
+  if (majorVersion < 1 || minorVersion < 4) {
+    throw new Error('Meteor version must be >= 1.4');
   }
-  if (majorVersion === 1 && minorVersion >= 4) {
-    return;
+
+  // Ensure current Meteor release >= 1.6 for 64-bit architecture
+  if (architecture === '64') {
+    _winston2.default.debug('check current Meteor release >= 1.6 for 64-bit Node');
+    if (majorVersion < 1 || minorVersion < 6) {
+      throw new Error('Meteor version must be >= 1.6 for 64-bit Node');
+    }
   }
-  throw new Error('Meteor version must be >= 1.4');
 } // Validation methods
 
 function validateSettings(filePath) {
