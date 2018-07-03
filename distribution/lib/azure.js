@@ -96,8 +96,7 @@ var AzureMethods = function () {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                _winston2.default.info('Validating Kudu connection');
-                _context2.next = 3;
+                _context2.next = 2;
                 return AzureMethods.forEachSite(this.sites, function () {
                   var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(site) {
                     return regeneratorRuntime.wrap(function _callee$(_context) {
@@ -142,7 +141,7 @@ var AzureMethods = function () {
                   };
                 }());
 
-              case 3:
+              case 2:
               case 'end':
                 return _context2.stop();
             }

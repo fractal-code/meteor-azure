@@ -1,13 +1,14 @@
 // CLI setup
 
+import { forEach as forEachParallel } from 'p-iteration';
 import program from 'commander';
 import shell from 'shelljs';
 import updateNotifier from 'update-notifier';
 import winston from 'winston';
 import pkg from '../../package.json';
-import { validateSettings, validateMeteor } from './validation';
 import compileBundle from './bundle';
 import AzureMethods from './azure';
+import { validateSettings, validateMeteor } from './validation';
 
 // Notify user of available updates
 updateNotifier({ pkg }).notify();
@@ -16,7 +17,7 @@ updateNotifier({ pkg }).notify();
 program
   .description(pkg.description)
   .version(`v${pkg.version}`, '-v, --version')
-  .option('-s, --settings <path>', 'path to settings file [settings.json]', 'settings.json')
+  .option('-s, --settings <paths>', 'path to settings file or comma-separated list of paths [settings.json]', 'settings.json')
   .option('-w, --web-config <path>', 'path to custom web.config file')
   .option('-d, --debug', 'enable debug mode')
   .option('-q, --quiet', 'enable quite mode')
@@ -41,22 +42,39 @@ if (program.debug === true) {
 
 export default async function startup() {
   try {
-    // Prechecks
-    validateMeteor();
-    const settingsFile = validateSettings(program.settings);
+    // Validate Meteor
+    validateMeteor(program);
+
+    // Validate settings file(s)
+    const settingsFilePaths = program.settings.split(',');
+    const settingsFiles = settingsFilePaths.map(path => validateSettings(path));
 
     // Configure Azure settings
-    const azureMethods = new AzureMethods(settingsFile);
-    await azureMethods.validateKuduCredentials();
-    await azureMethods.authenticateWithSdk();
-    await azureMethods.updateApplicationSettings();
+    const azureMethodsInstances = [];
+    await forEachParallel(settingsFiles, async (settingsFile, index) => {
+      const azureMethods = new AzureMethods(settingsFile);
+      winston.info(`Validating Kudu connection (${settingsFilePaths[index]})`);
+      await azureMethods.validateKuduCredentials();
+      await azureMethods.authenticateWithSdk();
+      await azureMethods.updateApplicationSettings();
+      azureMethodsInstances.push(azureMethods);
+    });
 
     // Deploy Meteor bundle
     const bundleFile = compileBundle({ customWebConfig: program.webConfig });
-    await azureMethods.deployBundle({ bundleFile });
+    await forEachParallel(azureMethodsInstances, async (azureMethods) => {
+      await azureMethods.deployBundle({ bundleFile });
+    });
 
     // Track server initialisation
-    await azureMethods.serverInitialisation({ isDebug: program.debug });
+    await forEachParallel(azureMethodsInstances, async (azureMethods) => {
+      try {
+        await azureMethods.serverInitialisation({ isDebug: program.debug });
+      } catch (error) {
+        // Do not fail fast (allows more efficient redeploys)
+        winston.warn(error.message);
+      }
+    });
   } catch (error) {
     winston.error(error.message);
     process.exit(1);

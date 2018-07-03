@@ -53,7 +53,6 @@ export default class AzureMethods {
   }
 
   async validateKuduCredentials() {
-    winston.info('Validating Kudu connection');
     await AzureMethods.forEachSite(this.sites, async (site) => {
       try {
         // Make dummy request to test Kudu auth

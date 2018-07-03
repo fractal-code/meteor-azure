@@ -49,7 +49,7 @@ export function validateMeteor() {
 export function validateSettings(filePath) {
   let settingsFile;
 
-  winston.info('Validating settings file');
+  winston.info(`Validating settings file (${filePath})`);
 
   // Ensure valid json exists
   winston.debug('check valid json exists');
@@ -97,7 +97,7 @@ export function validateSettings(filePath) {
       }
 
       // Report user-friendly error with relevant complaint/context to errors
-      throw new Error(`Settings file: ${lastError.message} in ${pathToParent}`);
+      throw new Error(`Settings file (${filePath}): ${lastError.message} in ${pathToParent}`);
     }
   });
 

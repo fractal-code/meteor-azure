@@ -81,7 +81,7 @@ function validateMeteor() {
 function validateSettings(filePath) {
   var settingsFile = void 0;
 
-  _winston2.default.info('Validating settings file');
+  _winston2.default.info(`Validating settings file (${filePath})`);
 
   // Ensure valid json exists
   _winston2.default.debug('check valid json exists');
@@ -127,7 +127,7 @@ function validateSettings(filePath) {
       }
 
       // Report user-friendly error with relevant complaint/context to errors
-      throw new Error(`Settings file: ${lastError.message} in ${pathToParent}`);
+      throw new Error(`Settings file (${filePath}): ${lastError.message} in ${pathToParent}`);
     }
   });
 

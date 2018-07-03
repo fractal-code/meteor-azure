@@ -52,6 +52,7 @@
     "lodash.nth": "^4.11.2",
     "lodash.omit": "^4.5.0",
     "ms-rest-azure": "^2.4.1",
+    "p-iteration": "^1.1.7",
     "shelljs": "^0.7.7",
     "tar": "^4.0.2",
     "tmp": "^0.0.33",
