@@ -1,5 +1,7 @@
 # Meteor Azure
 
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+
 A command line tool for deploying Meteor applications on Azure App Service.
 
 ![demo](https://user-images.githubusercontent.com/9661116/27125422-883fd03c-5137-11e7-86da-e899b6d06824.gif)
