@@ -1,6 +1,8 @@
 # Meteor Azure
 
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![npm version](https://badge.fury.io/js/meteor-azure.svg)](https://badge.fury.io/js/meteor-azure)
+![](https://img.shields.io/npm/dt/meteor-azure.svg)
 
 A command line tool for deploying Meteor applications on Azure App Service.
 
