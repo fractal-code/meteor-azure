@@ -35,7 +35,7 @@
     "eslint": "^4.0.0",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.16.0",
-    "npm-watch": "^0.3.0"
+    "npm-watch": "^0.6.0"
   },
   "dependencies": {
     "axios": "^0.18.0",
