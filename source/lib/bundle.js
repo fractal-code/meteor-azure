@@ -44,6 +44,7 @@ export default function compileBundle({ customWebConfig, architecture }) {
   tar.c({
     file: tarballPath,
     sync: true,
+    follow: true,
     gzip: true,
     cwd: workingDir,
   }, ['bundle']);

@@ -65,6 +65,7 @@ function compileBundle(_ref) {
   _tar.default.c({
     file: tarballPath,
     sync: true,
+    follow: true,
     gzip: true,
     cwd: workingDir
   }, ['bundle']);
