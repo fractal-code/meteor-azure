@@ -1,7 +1,5 @@
 "use strict";
 
-require("core-js/modules/es.array.iterator");
-
 require("core-js/modules/es.array.map");
 
 require("core-js/modules/es.object.assign");
@@ -25,6 +23,8 @@ var _msRestAzure = _interopRequireDefault(require("ms-rest-azure"));
 
 var _lodash = _interopRequireDefault(require("lodash.omit"));
 
+var _delay = _interopRequireDefault(require("delay"));
+
 var _lodash2 = _interopRequireDefault(require("lodash.defaultto"));
 
 var _axios = _interopRequireDefault(require("axios"));
@@ -36,6 +36,8 @@ var _jsesc = _interopRequireDefault(require("jsesc"));
 var _fs = _interopRequireDefault(require("fs"));
 
 var _winston = _interopRequireDefault(require("winston"));
+
+var _pIteration = require("p-iteration");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -83,7 +85,7 @@ function () {
       });
       return currentSite;
     });
-  } // Helper for async iteration over sites, returns a single promise (i.e awaitable)
+  } // Helper for concurrent async iteration over sites
 
 
   _createClass(AzureMethods, [{
@@ -481,7 +483,7 @@ function () {
                   var _ref7 = _asyncToGenerator(
                   /*#__PURE__*/
                   regeneratorRuntime.mark(function _callee9(site) {
-                    var kuduDeploy, delay, progress, kuduLogs, logDetailsUrl, logDetails;
+                    var kuduDeploy, progress, kuduLogs, logDetailsUrl, logDetails;
                     return regeneratorRuntime.wrap(function _callee9$(_context9) {
                       while (1) {
                         switch (_context9.prev = _context9.next) {
@@ -506,29 +508,23 @@ function () {
                             // Poll Kudu log entries to track live status
                             _winston.default.info(`${site.uniqueName}: Polling server status...`);
 
-                            delay = function delay(ms) {
-                              return new Promise(function (resolve) {
-                                return setTimeout(resolve, ms);
-                              });
-                            };
-
-                          case 6:
-                            _context9.prev = 6;
-                            _context9.next = 9;
+                          case 5:
+                            _context9.prev = 5;
+                            _context9.next = 8;
                             return site.kuduClient.get(kuduDeploy.headers.location);
 
-                          case 9:
+                          case 8:
                             progress = _context9.sent;
-                            _context9.next = 12;
-                            return delay(10000);
+                            _context9.next = 11;
+                            return (0, _delay.default)(10000);
 
-                          case 12:
-                            _context9.next = 17;
+                          case 11:
+                            _context9.next = 16;
                             break;
 
-                          case 14:
-                            _context9.prev = 14;
-                            _context9.t0 = _context9["catch"](6);
+                          case 13:
+                            _context9.prev = 13;
+                            _context9.t0 = _context9["catch"](5);
 
                             (function () {
                               /* Report polling error while ensuring users understand this doesn't indicate
@@ -547,68 +543,68 @@ function () {
           a final result):\n${logUrls.join('\n')}\n`);
                             })();
 
-                          case 17:
+                          case 16:
                             if (progress.data.complete === false) {
-                              _context9.next = 6;
+                              _context9.next = 5;
                               break;
                             }
 
-                          case 18:
+                          case 17:
                             if (!(isDebug === true)) {
-                              _context9.next = 35;
+                              _context9.next = 34;
                               break;
                             }
 
                             _winston.default.debug(`${site.uniqueName}: Retrieving Kudu deployment log...`);
 
-                            _context9.prev = 20;
-                            _context9.next = 23;
+                            _context9.prev = 19;
+                            _context9.next = 22;
                             return site.kuduClient(`/deployments/${progress.data.id}/log`);
 
-                          case 23:
+                          case 22:
                             kuduLogs = _context9.sent;
                             logDetailsUrl = kuduLogs.data.find(function (log) {
                               return log.details_url !== null;
                             }).details_url;
-                            _context9.next = 27;
+                            _context9.next = 26;
                             return site.kuduClient(logDetailsUrl);
 
-                          case 27:
+                          case 26:
                             logDetails = _context9.sent;
                             logDetails.data.forEach(function (log) {
                               return _winston.default.debug(log.message);
                             });
-                            _context9.next = 35;
+                            _context9.next = 34;
                             break;
 
-                          case 31:
-                            _context9.prev = 31;
-                            _context9.t1 = _context9["catch"](20);
+                          case 30:
+                            _context9.prev = 30;
+                            _context9.t1 = _context9["catch"](19);
 
                             _winston.default.error(_context9.t1.message);
 
                             throw new Error('Could not retrieve deployment log');
 
-                          case 35:
+                          case 34:
                             if (!(progress.data.status === 4)) {
-                              _context9.next = 39;
+                              _context9.next = 38;
                               break;
                             }
 
                             _winston.default.info(`${site.uniqueName}: Finished successfully`);
 
-                            _context9.next = 40;
+                            _context9.next = 39;
                             break;
 
-                          case 39:
+                          case 38:
                             throw new Error('Failed to complete server initialisation');
 
-                          case 40:
+                          case 39:
                           case "end":
                             return _context9.stop();
                         }
                       }
-                    }, _callee9, null, [[6, 14], [20, 31]]);
+                    }, _callee9, null, [[5, 13], [19, 30]]);
                   }));
 
                   return function (_x8) {
@@ -635,13 +631,13 @@ function () {
     value: function () {
       var _forEachSite = _asyncToGenerator(
       /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee12(sites, siteMethod) {
+      regeneratorRuntime.mark(function _callee12(sites, run) {
         return regeneratorRuntime.wrap(function _callee12$(_context12) {
           while (1) {
             switch (_context12.prev = _context12.next) {
               case 0:
                 _context12.next = 2;
-                return Promise.all(sites.map(
+                return (0, _pIteration.forEach)(sites,
                 /*#__PURE__*/
                 function () {
                   var _ref8 = _asyncToGenerator(
@@ -653,7 +649,7 @@ function () {
                           case 0:
                             _context11.prev = 0;
                             _context11.next = 3;
-                            return siteMethod(site);
+                            return run(site);
 
                           case 3:
                             _context11.next = 8;
@@ -675,7 +671,7 @@ function () {
                   return function (_x11) {
                     return _ref8.apply(this, arguments);
                   };
-                }()));
+                }());
 
               case 2:
               case "end":

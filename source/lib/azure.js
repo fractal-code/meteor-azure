@@ -3,12 +3,14 @@
 import AzureSdk from 'azure-arm-website';
 import msRest from 'ms-rest-azure';
 import omit from 'lodash.omit';
+import delay from 'delay';
 import defaultTo from 'lodash.defaultto';
 import axios from 'axios';
 import shell from 'shelljs';
 import jsesc from 'jsesc';
 import fs from 'fs';
 import winston from 'winston';
+import { forEach as forEachParallel } from 'p-iteration';
 
 export default class AzureMethods {
   constructor(settingsFile) {
@@ -39,17 +41,16 @@ export default class AzureMethods {
     });
   }
 
-  // Helper for async iteration over sites, returns a single promise (i.e awaitable)
-  static async forEachSite(sites, siteMethod) {
-    // Execute provided method on each site concurrently
-    await Promise.all(sites.map(async (site) => {
+  // Helper for concurrent async iteration over sites
+  static async forEachSite(sites, run) {
+    await forEachParallel(sites, async (site) => {
       try {
-        await siteMethod(site);
+        await run(site);
       } catch (error) {
         // Attach relevant site context to error
         throw new Error(`${site.uniqueName}: ${error.message}`);
       }
-    }));
+    });
   }
 
   async validateKuduCredentials() {
@@ -204,7 +205,6 @@ export default class AzureMethods {
 
       // Poll Kudu log entries to track live status
       winston.info(`${site.uniqueName}: Polling server status...`);
-      const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
       let progress;
       do {
         try {
@@ -225,7 +225,6 @@ export default class AzureMethods {
           a final result):\n${logUrls.join('\n')}\n`);
         }
       } while (progress.data.complete === false);
-
 
       // Provide full Kudu deployment log in debug mode
       if (isDebug === true) {
