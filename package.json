@@ -1,6 +1,6 @@
 {
   "name": "meteor-azure",
-  "version": "2.1.0-rc.7",
+  "version": "2.1.0",
   "description": "Automate Meteor deployments on Azure App Service",
   "main": "distribution/main.js",
   "bin": {
