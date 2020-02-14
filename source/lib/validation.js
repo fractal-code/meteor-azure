@@ -1,6 +1,7 @@
 // Validation methods
 
 import fs from 'fs';
+import semver from 'semver';
 import jsonfile from 'jsonfile';
 import winston from 'winston';
 import nth from 'lodash.nth';
@@ -28,29 +29,20 @@ export function validateMeteor(architecture) {
     throw new Error('You must be in a Meteor project directory');
   }
 
-  // Determine major/minor version numbers by stripping non-numeric characters from release
-  const versionNumbers = release.replace(/[^0-9]/g, '');
-  const majorVersion = Number.parseInt(versionNumbers.charAt(0), 10);
-  const minorVersion = Number.parseInt(versionNumbers.charAt(1), 10);
+  // -- Validate current Meteor release compatibility
+  winston.debug('validate current Meteor release compatibility');
+  const releaseSemver = semver.coerce(release);
+  // Ensure >= 1.4
+  if (!semver.satisfies(releaseSemver, '>=1.4.0')) { throw new Error('Meteor version must be >=1.4.0'); }
+  // Ensure >= 1.6 for 64-bit architecture
+  if (architecture === '64' && !semver.satisfies(releaseSemver, '>=1.6.0')) {
+    throw new Error('Meteor version must be >=1.6.0 for 64-bit Node');
+  }
 
   // Ensure project does not use 'force-ssl' package
   winston.debug('check for incompatible \'force-ssl\' package');
   if (packages.includes('force-ssl')) {
     throw new Error('The "force-ssl" package is not supported. Please read the docs to configure an HTTPS redirect in your web config.');
-  }
-
-  // Ensure current Meteor release is >= 1.4
-  winston.debug('check current Meteor release >= 1.4');
-  if (majorVersion < 1 || minorVersion < 4) {
-    throw new Error('Meteor version must be >= 1.4');
-  }
-
-  // Ensure current Meteor release >= 1.6 for 64-bit architecture
-  if (architecture === '64') {
-    winston.debug('check current Meteor release >= 1.6 for 64-bit Node');
-    if (majorVersion < 1 || minorVersion < 6) {
-      throw new Error('Meteor version must be >= 1.6 for 64-bit Node');
-    }
   }
 }
 

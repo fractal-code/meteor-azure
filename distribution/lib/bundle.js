@@ -1,5 +1,7 @@
 "use strict";
 
+require("core-js/modules/es.array.for-each");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });

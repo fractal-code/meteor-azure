@@ -4,8 +4,6 @@ require("core-js/modules/es.array.includes");
 
 require("core-js/modules/es.string.includes");
 
-require("core-js/modules/es.string.replace");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -13,6 +11,8 @@ exports.validateMeteor = validateMeteor;
 exports.validateSettings = validateSettings;
 
 var _fs = _interopRequireDefault(require("fs"));
+
+var _semver = _interopRequireDefault(require("semver"));
 
 var _jsonfile = _interopRequireDefault(require("jsonfile"));
 
@@ -47,33 +47,28 @@ function validateMeteor(architecture) {
     /* Abort the program if files are not found, this is a strong
        indication we may not be in the root project directory */
     throw new Error('You must be in a Meteor project directory');
-  } // Determine major/minor version numbers by stripping non-numeric characters from release
+  } // -- Validate current Meteor release compatibility
 
 
-  var versionNumbers = release.replace(/[^0-9]/g, '');
-  var majorVersion = Number.parseInt(versionNumbers.charAt(0), 10);
-  var minorVersion = Number.parseInt(versionNumbers.charAt(1), 10); // Ensure project does not use 'force-ssl' package
+  _winston.default.debug('validate current Meteor release compatibility');
+
+  var releaseSemver = _semver.default.coerce(release); // Ensure >= 1.4
+
+
+  if (!_semver.default.satisfies(releaseSemver, '>=1.4.0')) {
+    throw new Error('Meteor version must be >=1.4.0');
+  } // Ensure >= 1.6 for 64-bit architecture
+
+
+  if (architecture === '64' && !_semver.default.satisfies(releaseSemver, '>=1.6.0')) {
+    throw new Error('Meteor version must be >=1.6.0 for 64-bit Node');
+  } // Ensure project does not use 'force-ssl' package
+
 
   _winston.default.debug('check for incompatible \'force-ssl\' package');
 
   if (packages.includes('force-ssl')) {
     throw new Error('The "force-ssl" package is not supported. Please read the docs to configure an HTTPS redirect in your web config.');
-  } // Ensure current Meteor release is >= 1.4
-
-
-  _winston.default.debug('check current Meteor release >= 1.4');
-
-  if (majorVersion < 1 || minorVersion < 4) {
-    throw new Error('Meteor version must be >= 1.4');
-  } // Ensure current Meteor release >= 1.6 for 64-bit architecture
-
-
-  if (architecture === '64') {
-    _winston.default.debug('check current Meteor release >= 1.6 for 64-bit Node');
-
-    if (majorVersion < 1 || minorVersion < 6) {
-      throw new Error('Meteor version must be >= 1.6 for 64-bit Node');
-    }
   }
 }
 

@@ -1,5 +1,7 @@
 "use strict";
 
+require("core-js/modules/es.array.for-each");
+
 require("core-js/modules/es.array.map");
 
 require("core-js/modules/es.object.assign");
