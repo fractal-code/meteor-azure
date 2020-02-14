@@ -54,7 +54,7 @@ export default async function startup() {
 
     // Validate settings file(s)
     const settingsFilePaths = program.settings.split(',');
-    const settingsFiles = settingsFilePaths.map(path => validateSettings(path));
+    const settingsFiles = settingsFilePaths.map((path) => validateSettings(path));
 
     // Configure Azure settings
     const azureMethodsInstances = [];

@@ -217,7 +217,7 @@ export default class AzureMethods {
            manually using Kudu interface */
           winston.debug(error.message);
           const logId = progress.data.id;
-          const logUrls = sites.map(logSite => `${logSite.uniqueName}: https://${logSite.uniqueName}.scm.azurewebsites.net/api/vfs/site/deployments/${logId}/log.log`);
+          const logUrls = sites.map((logSite) => `${logSite.uniqueName}: https://${logSite.uniqueName}.scm.azurewebsites.net/api/vfs/site/deployments/${logId}/log.log`);
           throw new Error(`Could not poll server status.
           This is most likely due to an issue with your internet connection and does NOT indicate
           a deployment failure. You may choose to try again, or continue tracking the active deploy
@@ -231,9 +231,9 @@ export default class AzureMethods {
         winston.debug(`${site.uniqueName}: Retrieving Kudu deployment log...`);
         try {
           const kuduLogs = await site.kuduClient(`/deployments/${progress.data.id}/log`);
-          const logDetailsUrl = kuduLogs.data.find(log => log.details_url !== null).details_url;
+          const logDetailsUrl = kuduLogs.data.find((log) => log.details_url !== null).details_url;
           const logDetails = await site.kuduClient(logDetailsUrl);
-          logDetails.data.forEach(log => winston.debug(log.message));
+          logDetails.data.forEach((log) => winston.debug(log.message));
         } catch (error) {
           winston.error(error.message);
           throw new Error('Could not retrieve deployment log');
