@@ -1,6 +1,6 @@
 # Meteor Azure
 
-[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![Project Status: Inactive – The project has reached a stable, usable state but is no longer being actively developed; support/maintenance will be provided as time allows.](https://www.repostatus.org/badges/latest/inactive.svg)](https://www.repostatus.org/#inactive)
 [![npm version](https://badge.fury.io/js/meteor-azure.svg)](https://badge.fury.io/js/meteor-azure)
 ![](https://img.shields.io/npm/dt/meteor-azure.svg)
 
