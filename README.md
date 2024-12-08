@@ -1,6 +1,6 @@
 # Meteor Azure
 
-[![Project Status: Inactive – The project has reached a stable, usable state but is no longer being actively developed; support/maintenance will be provided as time allows.](https://www.repostatus.org/badges/latest/inactive.svg)](https://www.repostatus.org/#inactive)
+[![Project Status: Unsupported – The project has reached a stable, usable state but the author(s) have ceased all work on it. A new maintainer may be desired.](https://www.repostatus.org/badges/latest/unsupported.svg)](https://www.repostatus.org/#unsupported)
 [![npm version](https://badge.fury.io/js/meteor-azure.svg)](https://badge.fury.io/js/meteor-azure)
 ![](https://img.shields.io/npm/dt/meteor-azure.svg)
 
